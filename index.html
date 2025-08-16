@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interclasses Unimaua - Olimpíadas Escolares</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header-with-image">
+            <div class="header-overlay">
+                <div class="logo-container">
+                    <div class="logo">
+                        <div class="logo-shield">
+                            <div class="trophy">🏆</div>
+                            <div class="logo-text">INTERCLASSES</div>
+                            <div class="logo-main">UNIMAUA</div>
+                            <div class="logo-year">2025</div>
+                            <div class="logo-sports">
+                                <span class="sport-icon">⚽</span>
+                                <span class="sport-icon">♟️</span>
+                                <span class="sport-icon">♔</span>
+                                <span class="sport-icon">🏁</span>
+                                <span class="sport-icon">🏐</span>
+                                <span class="sport-icon">🏀</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <h1>Interclasses Unimaua</h1>
+                <p>Tabela de Pontuação Geral</p>
+            </div>
+        </header>
+
+        <!-- Filtros de Esportes -->
+        <div class="sports-tabs">
+            <button class="tab-btn active" data-sport="geral">🏅 Classificação Geral</button>
+            <button class="tab-btn" data-sport="futebol">⚽ Futebol</button>
+            <button class="tab-btn" data-sport="dama">♟️ Dama</button>
+            <button class="tab-btn" data-sport="xadrez">♔ Xadrez</button>
+            <button class="tab-btn" data-sport="pique-bandeira">🏁 Pique Bandeira</button>
+            <button class="tab-btn" data-sport="volei">🏐 Vôlei</button>
+            <button class="tab-btn" data-sport="basquete">🏀 Basquete</button>
+        </div>
+
+        <!-- Filtros por Ano Escolar -->
+        <div class="year-filters">
+            <h3>📚 Filtrar por Ano Escolar</h3>
+            <div class="year-tabs">
+                <button class="year-btn active" data-year="todos">🎯 Todos os Anos</button>
+                <button class="year-btn" data-year="1">1º Ano</button>
+                <button class="year-btn" data-year="2">2º Ano</button>
+                <button class="year-btn" data-year="3">3º Ano</button>
+                <button class="year-btn" data-year="4">4º Ano</button>
+                <button class="year-btn" data-year="5">5º Ano</button>
+                <button class="year-btn" data-year="6">6º Ano</button>
+                <button class="year-btn" data-year="7">7º Ano</button>
+                <button class="year-btn" data-year="8">8º Ano</button>
+                <button class="year-btn" data-year="9">9º Ano</button>
+                <button class="year-btn" data-year="1M">1º Ano Médio</button>
+                <button class="year-btn" data-year="2M">2º Ano Médio</button>
+                <button class="year-btn" data-year="3M">3º Ano Médio</button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table id="scoreTable">
+                <thead>
+                    <tr>
+                        <th>Posição</th>
+                        <th>Turma</th>
+                        <th>Pontos</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Dados serão carregados dinamicamente -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="last-update">
+            <p>Última atualização: <span id="lastUpdate">-</span></p>
+        </div>
+
+        <!-- Botão da Área Administrativa na parte de baixo -->
+        <div class="admin-section-bottom">
+            <a href="admin.html" class="admin-link-bottom" target="_blank">🔐 Área Administrativa</a>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

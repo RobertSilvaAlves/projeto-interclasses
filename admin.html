@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administração - Interclasses Unimaua</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔐 Área Administrativa</h1>
+            <p>Gerenciar Pontuações das Olimpíadas</p>
+            <a href="index.html" class="back-link">← Voltar para Tabela</a>
+        </header>
+
+        <!-- Tela de Login -->
+        <div id="loginScreen" class="login-screen">
+            <div class="login-box">
+                <h2>🔐 Acesso Administrativo</h2>
+                <p>Digite a senha para acessar o painel</p>
+                <input type="password" id="passwordInput" placeholder="Senha" maxlength="20">
+                <button onclick="checkPassword()" class="btn-primary">Entrar</button>
+                <p class="hint">Dica: A senha padrão é "admin123"</p>
+            </div>
+        </div>
+
+        <!-- Painel Administrativo -->
+        <div id="adminPanel" class="admin-panel" style="display: none;">
+            <div class="admin-section">
+                <h2>📊 Adicionar Pontuação</h2>
+                
+                <div class="form-group">
+                    <label for="sportSelect">Esporte:</label>
+                    <select id="sportSelect" required>
+                        <option value="">Selecione o esporte</option>
+                        <option value="futebol">⚽ Futebol</option>
+                        <option value="dama">♟️ Dama</option>
+                        <option value="xadrez">♔ Xadrez</option>
+                        <option value="pique-bandeira">🏁 Pique Bandeira</option>
+                        <option value="volei">🏐 Vôlei</option>
+                        <option value="basquete">🏀 Basquete</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="classSelect">Turma:</label>
+                    <select id="classSelect" required>
+                        <option value="">Selecione a turma</option>
+                        <!-- 1º Ano -->
+                        <optgroup label="1º Ano">
+                            <option value="1A">1º Ano A</option>
+                            <option value="1B">1º Ano B</option>
+                            <option value="1C">1º Ano C</option>
+                            <option value="1D">1º Ano D</option>
+                            <option value="1E">1º Ano E</option>
+                            <option value="1F">1º Ano F</option>
+                        </optgroup>
+                        <!-- 2º Ano -->
+                        <optgroup label="2º Ano">
+                            <option value="2A">2º Ano A</option>
+                            <option value="2B">2º Ano B</option>
+                            <option value="2C">2º Ano C</option>
+                            <option value="2D">2º Ano D</option>
+                            <option value="2E">2º Ano E</option>
+                            <option value="2F">2º Ano F</option>
+                        </optgroup>
+                        <!-- 3º Ano -->
+                        <optgroup label="3º Ano">
+                            <option value="3A">3º Ano A</option>
+                            <option value="3B">3º Ano B</option>
+                            <option value="3C">3º Ano C</option>
+                            <option value="3D">3º Ano D</option>
+                            <option value="3E">3º Ano E</option>
+                            <option value="3F">3º Ano F</option>
+                        </optgroup>
+                        <!-- 4º Ano -->
+                        <optgroup label="4º Ano">
+                            <option value="4A">4º Ano A</option>
+                            <option value="4B">4º Ano B</option>
+                            <option value="4C">4º Ano C</option>
+                            <option value="4D">4º Ano D</option>
+                            <option value="4E">4º Ano E</option>
+                            <option value="4F">4º Ano F</option>
+                        </optgroup>
+                        <!-- 5º Ano -->
+                        <optgroup label="5º Ano">
+                            <option value="5A">5º Ano A</option>
+                            <option value="5B">5º Ano B</option>
+                            <option value="5C">5º Ano C</option>
+                            <option value="5D">5º Ano D</option>
+                            <option value="5E">5º Ano E</option>
+                            <option value="5F">5º Ano F</option>
+                        </optgroup>
+                        <!-- 6º Ano -->
+                        <optgroup label="6º Ano">
+                            <option value="6A">6º Ano A</option>
+                            <option value="6B">6º Ano B</option>
+                            <option value="6C">6º Ano C</option>
+                            <option value="6D">6º Ano D</option>
+                            <option value="6E">6º Ano E</option>
+                            <option value="6F">6º Ano F</option>
+                        </optgroup>
+                        <!-- 7º Ano -->
+                        <optgroup label="7º Ano">
+                            <option value="7A">7º Ano A</option>
+                            <option value="7B">7º Ano B</option>
+                            <option value="7C">7º Ano C</option>
+                            <option value="7D">7º Ano D</option>
+                            <option value="7E">7º Ano E</option>
+                            <option value="7F">7º Ano F</option>
+                        </optgroup>
+                        <!-- 8º Ano -->
+                        <optgroup label="8º Ano">
+                            <option value="8A">8º Ano A</option>
+                            <option value="8B">8º Ano B</option>
+                            <option value="8C">8º Ano C</option>
+                            <option value="8D">8º Ano D</option>
+                            <option value="8E">8º Ano E</option>
+                            <option value="8F">8º Ano F</option>
+                        </optgroup>
+                        <!-- 9º Ano -->
+                        <optgroup label="9º Ano">
+                            <option value="9A">9º Ano A</option>
+                            <option value="9B">9º Ano B</option>
+                            <option value="9C">9º Ano C</option>
+                            <option value="9D">9º Ano D</option>
+                            <option value="9E">9º Ano E</option>
+                            <option value="9F">9º Ano F</option>
+                        </optgroup>
+                        <!-- 1º Ano Médio -->
+                        <optgroup label="1º Ano Médio">
+                            <option value="1MA">1º Ano Médio A</option>
+                            <option value="1MB">1º Ano Médio B</option>
+                            <option value="1MC">1º Ano Médio C</option>
+                            <option value="1MD">1º Ano Médio D</option>
+                            <option value="1ME">1º Ano Médio E</option>
+                            <option value="1MF">1º Ano Médio F</option>
+                        </optgroup>
+                        <!-- 2º Ano Médio -->
+                        <optgroup label="2º Ano Médio">
+                            <option value="2MA">2º Ano Médio A</option>
+                            <option value="2MB">2º Ano Médio B</option>
+                            <option value="2MC">2º Ano Médio C</option>
+                            <option value="2MD">2º Ano Médio D</option>
+                            <option value="2ME">2º Ano Médio E</option>
+                            <option value="2MF">2º Ano Médio F</option>
+                        </optgroup>
+                        <!-- 3º Ano Médio -->
+                        <optgroup label="3º Ano Médio">
+                            <option value="3MA">3º Ano Médio A</option>
+                            <option value="3MB">3º Ano Médio B</option>
+                            <option value="3MC">3º Ano Médio C</option>
+                            <option value="3MD">3º Ano Médio D</option>
+                            <option value="3ME">3º Ano Médio E</option>
+                            <option value="3MF">3º Ano Médio F</option>
+                        </optgroup>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="pointsInput">Pontos a Adicionar:</label>
+                    <input type="number" id="pointsInput" placeholder="0" min="0" max="10000" value="0" required>
+                    <small>Ex: 1000 pontos para futebol, 500 para dama, etc.</small>
+                </div>
+
+                <button onclick="addScore()" class="btn-primary">➕ Adicionar Pontuação</button>
+            </div>
+
+            <div class="admin-section">
+                <h2>⚙️ Configurações</h2>
+                <div class="form-group">
+                    <label for="newPassword">Nova Senha:</label>
+                    <input type="password" id="newPassword" placeholder="Nova senha" maxlength="20">
+                    <button onclick="changePassword()" class="btn-secondary">🔑 Alterar Senha</button>
+                </div>
+                
+                <div class="admin-section">
+                    <button onclick="resetData()" class="btn-danger">🗑️ Resetar Todos os Dados</button>
+                </div>
+            </div>
+
+            <div class="admin-section">
+                <h2>📋 Histórico de Alterações</h2>
+                <div id="historyLog" class="history-log">
+                    <!-- Histórico será carregado dinamicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>
