@@ -856,3 +856,122 @@ tr.bronze {
         max-width: 300px;
     }
 }
+
+/* Otimizações mobile adicionais */
+@media (max-width: 768px) {
+    body {
+        background-attachment: scroll;
+    }
+}
+
+/* Tabela como cards em telas pequenas */
+@media (max-width: 600px) {
+    .table-container {
+        padding: 12px;
+    }
+
+    table, thead, tbody, th, td, tr {
+        display: block;
+    }
+
+    thead {
+        display: none;
+    }
+
+    tr {
+        margin-bottom: 12px;
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        overflow: hidden;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 249, 250, 0.95));
+    }
+
+    td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 14px;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    td:last-child {
+        border-bottom: 0;
+    }
+
+    td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        color: #ff6b35;
+        margin-right: 10px;
+    }
+
+    /* Mensagens com colspan não precisam de rótulo */
+    td[colspan]::before {
+        content: none;
+    }
+}
+
+/* Complementos responsivos e acessibilidade tátil */
+@media (max-width: 600px) {
+	.table-container {
+		-webkit-overflow-scrolling: touch;
+	}
+
+	td {
+		word-break: break-word;
+		overflow-wrap: anywhere;
+	}
+
+	.tab-btn,
+	.year-btn {
+		white-space: normal;
+		text-align: center;
+		min-height: 44px;
+	}
+}
+
+/* Rolagem suave para histórico no iOS */
+.history-log {
+	-webkit-overflow-scrolling: touch;
+}
+
+/* Ajustes extra para telas muito pequenas */
+@media (max-width: 480px) {
+    .container {
+        padding: 12px;
+    }
+
+    .header-overlay {
+        padding: 20px;
+    }
+
+    .header-overlay h1 {
+        font-size: 1.8rem;
+    }
+
+    .header-overlay p {
+        font-size: 1rem;
+    }
+
+    .tab-btn {
+        font-size: 1rem;
+        padding: 12px 18px;
+    }
+
+    .year-btn {
+        font-size: 0.95rem;
+        padding: 10px 16px;
+    }
+
+    th, td {
+        padding: 10px 8px;
+    }
+}
+
+/* Respeitar preferências de movimento reduzido */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
+}

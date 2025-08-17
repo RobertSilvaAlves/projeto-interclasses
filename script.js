@@ -162,9 +162,9 @@ class ScoreSystem {
             }
 
             row.innerHTML = `
-                <td>${positionIcon}</td>
-                <td><strong>${classData.name}</strong></td>
-                <td><strong>${classData.points.toLocaleString('pt-BR')}</strong></td>
+                <td data-label="Posição">${positionIcon}</td>
+                <td data-label="Turma"><strong>${classData.name}</strong></td>
+                <td data-label="Pontos"><strong>${classData.points.toLocaleString('pt-BR')}</strong></td>
             `;
             
             tbody.appendChild(row);
