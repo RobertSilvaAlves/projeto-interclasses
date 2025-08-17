@@ -2,7 +2,14 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Tabela de Pontuação das Olimpíadas Interclasses Unimaua - Acompanhe os resultados em tempo real">
+    <meta name="keywords" content="interclasses, olimpíadas, pontuação, unimaua, esportes">
+    <meta name="author" content="Interclasses Unimaua">
+    <meta name="theme-color" content="#ff6b35">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Interclasses Unimaua">
     <title>Interclasses Unimaua - Olimpíadas Escolares</title>
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -64,13 +71,26 @@
             </div>
         </div>
 
+        <!-- Seletor de Visualização -->
+        <div class="view-selector">
+            <h3>📊 Tipo de Visualização</h3>
+            <div class="view-tabs">
+                <button class="view-btn active" data-view="salas">🏫 Ranking das Salas</button>
+                <button class="view-btn" data-view="jogadores">👥 Ranking dos Jogadores</button>
+            </div>
+        </div>
+
         <div class="table-container">
             <table id="scoreTable">
                 <thead>
                     <tr>
                         <th>Posição</th>
-                        <th>Turma</th>
+                        <th>Turma/Jogador</th>
                         <th>Pontos</th>
+                        <th>Vitórias</th>
+                        <th>Empates</th>
+                        <th>Derrotas</th>
+                        <th>Jogos</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">

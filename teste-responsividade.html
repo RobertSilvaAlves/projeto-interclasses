@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Teste de Responsividade - Interclasses Unimaua</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 25%, #ffd700 50%, #4ecdc4 75%, #45b7d1 100%);
+            min-height: 100vh;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+        .test-item {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 5px solid #ff6b35;
+        }
+        .test-title {
+            color: #ff6b35;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+        .test-description {
+            color: #666;
+            line-height: 1.6;
+        }
+        .responsive-info {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-family: monospace;
+        }
+        .link-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            color: white;
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            margin: 10px 5px;
+            transition: all 0.3s ease;
+        }
+        .link-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 style="color: #ff6b35; text-align: center;">📱 Teste de Responsividade</h1>
+        <p style="text-align: center; color: #666; margin-bottom: 30px;">
+            Interclasses Unimaua - Olimpíadas Escolares
+        </p>
+
+        <div class="test-item">
+            <div class="test-title">🎯 Como Testar a Responsividade</div>
+            <div class="test-description">
+                Para testar se o site está responsivo, você pode:
+                <ul>
+                    <li>Redimensionar a janela do navegador</li>
+                    <li>Usar as ferramentas de desenvolvedor (F12) e simular dispositivos móveis</li>
+                    <li>Acessar o site em um celular ou tablet real</li>
+                    <li>Usar extensões de navegador para testar responsividade</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-item">
+            <div class="test-title">📱 Novas Funcionalidades Mobile</div>
+            <div class="test-description">
+                <strong>Filtros de Esportes Otimizados:</strong>
+                <ul>
+                    <li>🔄 Organizados em 3 botões por linha no mobile</li>
+                    <li>📏 Tamanhos ajustados para melhor usabilidade</li>
+                    <li>🎨 Design responsivo que se adapta ao tamanho da tela</li>
+                    <li>📱 Em landscape: 4 botões por linha para aproveitar o espaço</li>
+                </ul>
+                
+                <strong>Menu Hambúrguer para Anos Escolares:</strong>
+                <ul>
+                    <li>☰ Ícone de hambúrguer que gira ao abrir</li>
+                    <li>🎬 Animações suaves de entrada e saída</li>
+                    <li>👆 Fechamento automático ao clicar fora do menu</li>
+                    <li>⚡ Transições escalonadas para cada botão</li>
+                    <li>📱 Economia de espaço vertical na tela</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-item">
+            <div class="test-title">📱 Breakpoints Implementados</div>
+            <div class="test-description">
+                O site foi otimizado para os seguintes tamanhos de tela:
+                <ul>
+                    <li><strong>Desktop:</strong> Acima de 1024px</li>
+                    <li><strong>Tablet:</strong> 769px - 1024px</li>
+                    <li><strong>Mobile Grande:</strong> 481px - 768px</li>
+                    <li><strong>Mobile Médio:</strong> 361px - 480px</li>
+                    <li><strong>Mobile Pequeno:</strong> Até 360px</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-item">
+            <div class="test-title">✨ Melhorias Mobile Implementadas</div>
+            <div class="test-description">
+                <ul>
+                    <li>✅ Layout adaptativo para diferentes tamanhos de tela</li>
+                    <li>✅ Botões com área de toque otimizada (mínimo 44px)</li>
+                    <li>✅ Fontes ajustadas para prevenir zoom automático no iOS</li>
+                    <li>✅ Scroll suave e otimizado para touch</li>
+                    <li>✅ Tabela responsiva com scroll horizontal</li>
+                    <li>✅ <strong>Filtros de esportes organizados em 3 por linha no mobile</strong></li>
+                    <li>✅ <strong>Menu hambúrguer para filtros de ano escolar</strong></li>
+                    <li>✅ Logo e elementos redimensionados proporcionalmente</li>
+                    <li>✅ Espaçamentos e margens ajustados</li>
+                    <li>✅ Suporte a orientação landscape</li>
+                    <li>✅ Meta tags para PWA e acessibilidade</li>
+                    <li>✅ <strong>Animações suaves no menu hambúrguer</strong></li>
+                    <li>✅ <strong>Fechamento automático do menu ao clicar fora</strong></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-item">
+            <div class="test-title">🔗 Links para Teste</div>
+            <div style="text-align: center;">
+                <a href="index.html" class="link-button">📊 Página Principal</a>
+                <a href="admin.html" class="link-button">🔐 Área Administrativa</a>
+            </div>
+        </div>
+
+        <div class="test-item">
+            <div class="test-title">📊 Informações da Tela</div>
+            <div class="responsive-info" id="screenInfo">
+                Carregando informações da tela...
+            </div>
+        </div>
+
+        <div class="test-item">
+            <div class="test-title">💡 Dicas de Teste</div>
+            <div class="test-description">
+                <ul>
+                    <li>Teste a navegação por toque em dispositivos reais</li>
+                    <li>Verifique se os botões são fáceis de pressionar</li>
+                    <li>Confirme se o texto é legível em todas as telas</li>
+                    <li>Teste a orientação landscape e portrait</li>
+                    <li>Verifique se a tabela pode ser rolada horizontalmente</li>
+                    <li>Teste os filtros de esporte e ano escolar</li>
+                    <li><strong>🎯 Teste o menu hambúrguer dos anos escolares</strong></li>
+                    <li><strong>📱 Verifique se os filtros de esporte ficam em 3 por linha</strong></li>
+                    <li><strong>🔄 Teste as animações do menu hambúrguer</strong></li>
+                    <li><strong>👆 Teste o fechamento automático do menu ao clicar fora</strong></li>
+                    <li><strong>📐 Teste em diferentes tamanhos de tela (360px, 480px, 768px)</strong></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateScreenInfo() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const pixelRatio = window.devicePixelRatio || 1;
+            const userAgent = navigator.userAgent;
+            
+            let deviceType = 'Desktop';
+            if (width <= 360) deviceType = 'Mobile Pequeno';
+            else if (width <= 480) deviceType = 'Mobile Médio';
+            else if (width <= 768) deviceType = 'Mobile Grande';
+            else if (width <= 1024) deviceType = 'Tablet';
+            
+            document.getElementById('screenInfo').innerHTML = `
+                <strong>Largura:</strong> ${width}px<br>
+                <strong>Altura:</strong> ${height}px<br>
+                <strong>Tipo de Dispositivo:</strong> ${deviceType}<br>
+                <strong>Pixel Ratio:</strong> ${pixelRatio}<br>
+                <strong>User Agent:</strong> ${userAgent.substring(0, 100)}...
+            `;
+        }
+        
+        // Atualizar informações quando a página carrega
+        updateScreenInfo();
+        
+        // Atualizar quando a janela é redimensionada
+        window.addEventListener('resize', updateScreenInfo);
+        
+        // Atualizar quando a orientação muda
+        window.addEventListener('orientationchange', function() {
+            setTimeout(updateScreenInfo, 100);
+        });
+    </script>
+</body>
+</html>
