@@ -24,6 +24,10 @@ body {
     padding: 20px;
 }
 
+.admin-title-h1{
+    color: white;
+}
+
 /* Header com Imagem de Fundo */
 .header-with-image {
     background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400"><defs><linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:%23ff6b35;stop-opacity:1" /><stop offset="25%" style="stop-color:%23f7931e;stop-opacity:1" /><stop offset="50%" style="stop-color:%23ffd700;stop-opacity:1" /><stop offset="75%" style="stop-color:%234ecdc4;stop-opacity:1" /><stop offset="100%" style="stop-color:%2345b7d1;stop-opacity:1" /></linearGradient></defs><rect width="1200" height="400" fill="url(%23bg)"/><g opacity="0.1"><circle cx="200" cy="100" r="20" fill="%23ffd700"/><circle cx="1000" cy="150" r="15" fill="%23ffd700"/><circle cx="300" cy="300" r="25" fill="%23ffd700"/><circle cx="800" cy="80" r="18" fill="%23ffd700"/></g></svg>');
@@ -644,79 +648,817 @@ tr:nth-child(3) {
     box-shadow: 0 8px 25px rgba(78, 205, 196, 0.4);
 }
 
+/* Seletor de Visualização */
+.view-selector {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 249, 250, 0.95));
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    border: 2px solid #ffd700;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.view-selector h3 {
+    margin-bottom: 20px;
+    color: #ff6b35;
+    font-size: 1.5rem;
+    border-bottom: 2px solid #ffd700;
+    padding-bottom: 10px;
+    display: inline-block;
+}
+
+.view-tabs {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.view-btn {
+    background: linear-gradient(135deg, #fff, #f8f9fa);
+    border: 2px solid #ffd700;
+    padding: 15px 25px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+    min-width: 150px;
+}
+
+.view-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.view-btn:hover::before {
+    left: 100%;
+}
+
+.view-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border-color: #ff6b35;
+}
+
+.view-btn.active {
+    background: linear-gradient(135deg, #4ecdc4, #45b7d1);
+    color: white;
+    transform: scale(1.05);
+    border-color: #ffd700;
+    box-shadow: 0 8px 25px rgba(78, 205, 196, 0.4);
+}
+
 /* Responsividade */
 @media (max-width: 768px) {
     .container {
-        padding: 15px;
+        padding: 10px;
+        max-width: 100%;
+    }
+    
+    /* Header responsivo */
+    .header-with-image {
+        border-radius: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .header-overlay {
+        padding: 20px 15px;
     }
     
     .header-overlay h1 {
-        font-size: 2.2rem;
+        font-size: 1.8rem;
+        line-height: 1.2;
+        margin-bottom: 8px;
     }
     
+    .header-overlay p {
+        font-size: 1rem;
+        margin-bottom: 15px;
+    }
+    
+    /* Logo responsivo */
     .logo {
-        width: 100px;
-        height: 100px;
+        width: 80px;
+        height: 80px;
+        margin-bottom: 15px;
     }
     
     .logo-text {
-        font-size: 7px;
+        font-size: 6px;
     }
     
     .logo-main {
-        font-size: 12px;
+        font-size: 10px;
     }
     
     .logo-year {
-        font-size: 7px;
+        font-size: 6px;
     }
     
     .sport-icon {
-        font-size: 7px;
+        font-size: 6px;
     }
     
+    .trophy {
+        font-size: 18px;
+    }
+    
+    /* Tabs de esportes responsivos - 3 por linha */
     .sports-tabs {
-        flex-direction: column;
-        align-items: center;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 20px;
     }
     
     .tab-btn {
-        width: 100%;
-        max-width: 350px;
+        width: calc(33.333% - 6px);
+        min-width: 100px;
+        max-width: 120px;
+        padding: 10px 8px;
+        font-size: 0.85rem;
+        border-radius: 15px;
+        min-height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        line-height: 1.2;
     }
     
-    .table-container {
+    /* Menu hambúrguer para filtros de ano */
+    .year-filters {
         padding: 15px;
+        margin-bottom: 20px;
+        position: relative;
     }
     
-    th, td {
-        padding: 12px 8px;
-        font-size: 0.9rem;
+    .year-filters h3 {
+        font-size: 1.2rem;
+        margin-bottom: 15px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 10px;
+        background: linear-gradient(135deg, #ff6b35, #f7931e);
+        color: white;
+        border-radius: 15px;
+        border: 2px solid #ffd700;
+        transition: all 0.3s ease;
     }
     
-    .admin-section {
-        padding: 25px;
+    .year-filters h3::before {
+        content: '☰';
+        font-size: 1.5rem;
+        transition: transform 0.3s ease;
     }
     
-    .btn-primary, .btn-secondary, .btn-danger {
-        width: 100%;
-        margin-right: 0;
+    .year-filters.active h3::before {
+        transform: rotate(90deg);
     }
     
-    .login-box {
-        padding: 30px 20px;
-        margin: 20px;
+    .year-filters h3:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
     }
-
-    /* Responsividade para filtros de ano */
+    
     .year-tabs {
         flex-direction: column;
         align-items: center;
+        gap: 8px;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease, padding 0.3s ease;
+        padding: 0;
+    }
+    
+    .year-filters.active .year-tabs {
+        max-height: 500px;
+        padding: 15px 0;
     }
     
     .year-btn {
         width: 100%;
         max-width: 200px;
+        padding: 8px 12px;
+        font-size: 0.85rem;
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transform: translateY(-10px);
+        transition: all 0.3s ease;
+    }
+    
+    .year-filters.active .year-btn {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    
+    .year-btn:nth-child(1) { transition-delay: 0.1s; }
+    .year-btn:nth-child(2) { transition-delay: 0.15s; }
+    .year-btn:nth-child(3) { transition-delay: 0.2s; }
+    .year-btn:nth-child(4) { transition-delay: 0.25s; }
+    .year-btn:nth-child(5) { transition-delay: 0.3s; }
+    .year-btn:nth-child(6) { transition-delay: 0.35s; }
+    .year-btn:nth-child(7) { transition-delay: 0.4s; }
+    .year-btn:nth-child(8) { transition-delay: 0.45s; }
+    .year-btn:nth-child(9) { transition-delay: 0.5s; }
+    .year-btn:nth-child(10) { transition-delay: 0.55s; }
+    .year-btn:nth-child(11) { transition-delay: 0.6s; }
+    .year-btn:nth-child(12) { transition-delay: 0.65s; }
+    .year-btn:nth-child(13) { transition-delay: 0.7s; }
+    
+    /* Seletor de visualização responsivo */
+    .view-selector {
+        padding: 20px 15px;
+        margin-bottom: 20px;
+    }
+    
+    .view-selector h3 {
+        font-size: 1.3rem;
+        margin-bottom: 15px;
+    }
+    
+    .view-tabs {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .view-btn {
+        width: 100%;
+        max-width: 300px;
+        padding: 12px 20px;
+        font-size: 1rem;
+        min-height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Tabela responsiva */
+    .table-container {
+        padding: 15px 10px;
+        margin-bottom: 20px;
+        border-radius: 15px;
+    }
+    
+    table {
+        font-size: 0.85rem;
+    }
+    
+    th, td {
+        padding: 10px 6px;
+        font-size: 0.85rem;
+        word-wrap: break-word;
+        max-width: 120px;
+    }
+    
+    th {
+        font-size: 0.9rem;
+        padding: 12px 6px;
+    }
+    
+    /* Última atualização responsiva */
+    .last-update {
+        margin-top: 20px;
+        margin-bottom: 20px;
+        padding: 12px;
+        font-size: 0.9rem;
+    }
+    
+    /* Botão administrativo responsivo */
+    .admin-section-bottom {
+        margin: 20px 0;
+        padding: 15px;
+    }
+    
+    .admin-link-bottom {
+        padding: 12px 25px;
+        font-size: 16px;
+        width: 100%;
+        max-width: 300px;
+        min-height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+/* Responsividade para telas muito pequenas */
+@media (max-width: 480px) {
+    .container {
+        padding: 8px;
+    }
+    
+    .header-overlay {
+        padding: 15px 10px;
+    }
+    
+    .header-overlay h1 {
+        font-size: 1.5rem;
+    }
+    
+    .header-overlay p {
+        font-size: 0.9rem;
+    }
+    
+    .logo {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .logo-text {
+        font-size: 5px;
+    }
+    
+    .logo-main {
+        font-size: 9px;
+    }
+    
+    .logo-year {
+        font-size: 5px;
+    }
+    
+    .sport-icon {
+        font-size: 5px;
+    }
+    
+    .trophy {
+        font-size: 16px;
+    }
+    
+    /* Tabs de esportes ainda menores */
+    .tab-btn {
+        width: calc(33.333% - 4px);
+        min-width: 80px;
+        max-width: 100px;
+        padding: 8px 6px;
+        font-size: 0.75rem;
+        min-height: 40px;
+        border-radius: 12px;
+    }
+    
+    /* Menu hambúrguer ajustado */
+    .year-filters h3 {
+        font-size: 1.1rem;
+        padding: 8px;
+    }
+    
+    .year-filters h3::before {
+        font-size: 1.3rem;
+    }
+    
+    .year-btn {
+        max-width: 180px;
+        padding: 6px 10px;
+        font-size: 0.8rem;
+        min-height: 35px;
+    }
+    
+    .table-container {
+        padding: 10px 5px;
+    }
+    
+    table {
+        font-size: 0.8rem;
+    }
+    
+    th, td {
+        padding: 8px 4px;
+        font-size: 0.8rem;
+        max-width: 100px;
+    }
+    
+    th {
+        font-size: 0.85rem;
+        padding: 10px 4px;
+    }
+    
+    .admin-link-bottom {
+        padding: 10px 20px;
+        font-size: 14px;
+        max-width: 280px;
+        min-height: 45px;
+    }
+    
+    .last-update {
+        padding: 10px;
+        font-size: 0.85rem;
+    }
+}
+
+/* Responsividade para telas extremamente pequenas */
+@media (max-width: 360px) {
+    .header-overlay h1 {
+        font-size: 1.3rem;
+    }
+    
+    .header-overlay p {
+        font-size: 0.8rem;
+    }
+    
+    .logo {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .logo-text {
+        font-size: 4px;
+    }
+    
+    .logo-main {
+        font-size: 8px;
+    }
+    
+    .logo-year {
+        font-size: 4px;
+    }
+    
+    .sport-icon {
+        font-size: 4px;
+    }
+    
+    .trophy {
+        font-size: 14px;
+    }
+    
+    /* Tabs de esportes para telas muito pequenas */
+    .tab-btn {
+        width: calc(33.333% - 3px);
+        min-width: 70px;
+        max-width: 90px;
+        padding: 6px 4px;
+        font-size: 0.7rem;
+        min-height: 35px;
+        border-radius: 10px;
+    }
+    
+    /* Menu hambúrguer para telas muito pequenas */
+    .year-filters h3 {
+        font-size: 1rem;
+        padding: 6px;
+    }
+    
+    .year-filters h3::before {
+        font-size: 1.2rem;
+    }
+    
+    .year-btn {
+        max-width: 160px;
+        padding: 5px 8px;
+        font-size: 0.75rem;
+        min-height: 30px;
+    }
+    
+    th, td {
+        padding: 6px 3px;
+        font-size: 0.75rem;
+        max-width: 80px;
+    }
+    
+    th {
+        font-size: 0.8rem;
+        padding: 8px 3px;
+    }
+    
+    .admin-link-bottom {
+        padding: 8px 15px;
+        font-size: 13px;
+        max-width: 250px;
+        min-height: 40px;
+    }
+}
+
+/* Responsividade para admin.html */
+@media (max-width: 768px) {
+    /* Login screen responsivo */
+    .login-screen {
+        min-height: 50vh;
+        padding: 20px;
+    }
+    
+    .login-box {
+        padding: 25px 20px;
+        margin: 10px;
+        max-width: 100%;
+    }
+    
+    .login-box h2 {
+        font-size: 1.5rem;
+    }
+    
+    .login-box p {
+        font-size: 0.9rem;
+    }
+    
+    .hint {
+        font-size: 0.8rem;
+    }
+    
+    /* Admin panel responsivo */
+    .admin-panel {
+        gap: 20px;
+    }
+    
+    .admin-section {
+        padding: 20px 15px;
+        border-radius: 15px;
+    }
+    
+    .admin-section h2 {
+        font-size: 1.4rem;
+        margin-bottom: 20px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        font-size: 1rem;
+        margin-bottom: 8px;
+    }
+    
+    .form-group input,
+    .form-group select {
+        padding: 12px;
+        font-size: 1rem;
+        border-radius: 12px;
+    }
+    
+    .form-group small {
+        font-size: 0.8rem;
+    }
+    
+    /* Botões responsivos */
+    .btn-primary, .btn-secondary, .btn-danger {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 10px;
+        padding: 12px 20px;
+        font-size: 1rem;
+        min-height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Histórico responsivo */
+    .history-log {
+        max-height: 250px;
+        padding: 15px;
+    }
+    
+    .history-item {
+        padding: 12px;
+        margin-bottom: 10px;
+    }
+    
+    .history-item .time {
+        font-size: 0.8rem;
+    }
+    
+    .history-item .action {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .login-box {
+        padding: 20px 15px;
+    }
+    
+    .login-box h2 {
+        font-size: 1.3rem;
+    }
+    
+    .admin-section {
+        padding: 15px 10px;
+    }
+    
+    .admin-section h2 {
+        font-size: 1.2rem;
+    }
+    
+    .form-group input,
+    .form-group select {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+    
+    .btn-primary, .btn-secondary, .btn-danger {
+        padding: 10px 15px;
+        font-size: 0.9rem;
+        min-height: 40px;
+    }
+    
+    .history-log {
+        max-height: 200px;
+        padding: 10px;
+    }
+    
+    .history-item {
+        padding: 10px;
+    }
+    
+    .history-item .action {
+        font-size: 0.9rem;
+    }
+}
+
+/* Melhorias para touch em dispositivos móveis */
+@media (max-width: 768px) {
+    /* Aumentar área de toque para botões */
+    .tab-btn, .year-btn, .btn-primary, .btn-secondary, .btn-danger, .admin-link-bottom {
+        min-height: 44px; /* Mínimo recomendado para touch */
+        touch-action: manipulation;
+    }
+    
+    /* Melhorar scroll horizontal da tabela */
+    .table-container {
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+    }
+    
+    /* Otimizar scroll do histórico */
+    .history-log {
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Melhorar feedback visual para touch */
+    .tab-btn:active, .year-btn:active, .btn-primary:active, .btn-secondary:active, .btn-danger:active {
+        transform: scale(0.95);
+        transition: transform 0.1s ease;
+    }
+    
+    /* Ajustar espaçamento para melhor navegação */
+    .sports-tabs, .year-tabs {
+        gap: 8px;
+    }
+    
+    /* Melhorar legibilidade em telas pequenas */
+    body {
+        font-size: 16px; /* Previne zoom automático no iOS */
+    }
+    
+    input, select, textarea {
+        font-size: 16px; /* Previne zoom automático no iOS */
+    }
+}
+
+/* Orientação landscape em mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+    .header-overlay {
+        padding: 15px;
+    }
+    
+    .header-overlay h1 {
+        font-size: 1.5rem;
+    }
+    
+    .logo {
+        width: 60px;
+        height: 60px;
+    }
+    
+    /* Tabs de esportes em landscape - 4 por linha */
+    .sports-tabs {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 6px;
+    }
+    
+    .tab-btn {
+        width: calc(25% - 5px);
+        min-width: 80px;
+        max-width: 100px;
+        padding: 8px 6px;
+        font-size: 0.8rem;
+        min-height: 35px;
+    }
+    
+    /* Menu hambúrguer em landscape */
+    .year-filters h3 {
+        font-size: 1.1rem;
+        padding: 8px;
+    }
+    
+    .year-filters h3::before {
+        font-size: 1.3rem;
+    }
+    
+    .year-btn {
+        max-width: 150px;
+        padding: 6px 8px;
+        font-size: 0.8rem;
+        min-height: 30px;
+    }
+    
+    .table-container {
+        max-height: 60vh;
+        overflow-y: auto;
+    }
+}
+
+/* Melhorias para tablets */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .container {
+        padding: 15px;
+        max-width: 900px;
+    }
+    
+    .header-overlay h1 {
+        font-size: 2.4rem;
+    }
+    
+    .tab-btn {
+        padding: 12px 20px;
+        font-size: 1rem;
+    }
+    
+    .year-btn {
+        padding: 10px 15px;
+        font-size: 0.9rem;
+    }
+    
+    th, td {
+        padding: 15px 10px;
+        font-size: 1rem;
+    }
+}
+
+/* Melhorias para telas grandes */
+@media (min-width: 1025px) {
+    .container {
+        max-width: 1400px;
+    }
+    
+    .sports-tabs {
+        gap: 20px;
+    }
+    
+    .year-tabs {
+        gap: 15px;
+    }
+    
+    .tab-btn, .year-btn {
+        transition: all 0.3s ease;
+    }
+    
+    .tab-btn:hover, .year-btn:hover {
+        transform: translateY(-3px);
+    }
+}
+
+/* Acessibilidade e usabilidade */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Modo escuro para dispositivos que suportam */
+@media (prefers-color-scheme: dark) {
+    /* Manter as cores originais para manter a identidade visual */
+    /* Mas podemos ajustar contrastes se necessário */
+}
+
+/* Melhorias para impressão */
+@media print {
+    .admin-section-bottom,
+    .sports-tabs,
+    .year-filters {
+        display: none;
+    }
+    
+    .table-container {
+        box-shadow: none;
+        border: 1px solid #000;
+    }
+    
+    th, td {
+        border: 1px solid #000;
     }
 }
 
@@ -835,24 +1577,3 @@ tr.bronze {
     left: 100%;
 }
 
-/* Responsividade para o botão da área administrativa */
-@media (max-width: 768px) {
-    .admin-link-bottom {
-        padding: 12px 25px;
-        font-size: 16px;
-    }
-    
-    .admin-section-bottom {
-        margin: 20px 0;
-        padding: 15px;
-    }
-}
-
-@media (max-width: 480px) {
-    .admin-link-bottom {
-        padding: 10px 20px;
-        font-size: 14px;
-        width: 90%;
-        max-width: 300px;
-    }
-}
