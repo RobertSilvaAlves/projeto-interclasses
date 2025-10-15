@@ -3,8 +3,14 @@ class AdminSystem {
     constructor() {
         this.password = this.loadPassword();
         this.history = this.loadHistory();
+        this.studentsData = null;
         this.setupEventListeners();
         this.loadPlayerSelects();
+        this.initializeStudentsData();
+    }
+
+    async initializeStudentsData() {
+        await this.loadStudentsData();
     }
 
     setupEventListeners() {
@@ -118,18 +124,33 @@ class AdminSystem {
         document.getElementById('sportSelect').value = '';
         document.getElementById('classSelect').value = '';
         document.getElementById('pointsInput').value = '0';
-        document.getElementById('playerTypeSelect').value = '';
-        document.getElementById('playerClassSelect').value = '';
-        document.getElementById('playerName').value = '';
-        document.getElementById('playerNumber').value = '';
+        document.getElementById('registrationTypeSelect').value = '';
+        document.getElementById('teamSportSelect').value = '';
+        document.getElementById('teamClassSelect').value = '';
+        document.getElementById('teamName').value = '';
+        document.getElementById('studentClassSelect').value = '';
+        document.getElementById('studentName').value = '';
+        document.getElementById('gameTypeSelect').value = '';
         document.getElementById('gameSportSelect').value = '';
         document.getElementById('player1Select').value = '';
         document.getElementById('player2Select').value = '';
+        document.getElementById('student1ClassSelect').value = '';
+        document.getElementById('student1Select').value = '';
+        document.getElementById('student2ClassSelect').value = '';
+        document.getElementById('student2Select').value = '';
         document.getElementById('player1Score').value = '0';
         document.getElementById('player2Score').value = '0';
+        document.getElementById('player1BonusPoints').value = '0';
+        document.getElementById('player2BonusPoints').value = '0';
+        document.getElementById('studentClassSelect').value = '';
+        document.getElementById('studentPoints').value = '0';
         
-        // Esconder campo de número
-        document.getElementById('playerNumberGroup').style.display = 'none';
+        // Esconder todos os campos específicos
+        document.getElementById('teamRegistrationFields').style.display = 'none';
+        document.getElementById('studentRegistrationFields').style.display = 'none';
+        document.getElementById('teamFields').style.display = 'none';
+        document.getElementById('studentFields').style.display = 'none';
+        document.getElementById('studentsList').style.display = 'none';
     }
 
     // Função para alternar campos baseado no tipo selecionado
@@ -195,6 +216,25 @@ class AdminSystem {
 
     // ===== NOVAS FUNCIONALIDADES =====
 
+    async loadStudentsData() {
+        try {
+            // Carregar dados dos alunos do arquivo JSON
+            const response = await fetch('assets/alunos_por_turma.json');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            this.studentsData = data;
+            console.log('Dados dos alunos carregados:', data);
+            this.showNotification('✅ Dados dos alunos carregados com sucesso!', 'success');
+        } catch (error) {
+            console.error('Erro ao carregar dados dos alunos:', error);
+            this.showNotification('❌ Erro ao carregar dados dos alunos! Verifique se o arquivo existe.', 'error');
+            // Tentar carregar dados de fallback ou mostrar instruções
+            this.showNotification('💡 Certifique-se de que o arquivo assets/alunos_por_turma.json existe e está acessível.', 'info');
+        }
+    }
+
     loadPlayerSelects() {
         this.updatePlayerSelects();
     }
@@ -244,78 +284,330 @@ class AdminSystem {
         localStorage.setItem('lastUpdate', lastUpdate);
     }
 
-    addPlayer() {
-        const playerType = document.getElementById('playerTypeSelect').value;
-        const className = document.getElementById('playerClassSelect').value;
-        const name = document.getElementById('playerName').value.trim();
-        const number = parseInt(document.getElementById('playerNumber').value);
+    // Cadastrar times ou alunos
+    addRegistration() {
+        const registrationType = document.getElementById('registrationTypeSelect').value;
 
-        if (!playerType || !className || !name) {
+        if (!registrationType) {
+            this.showNotification('❌ Selecione o tipo de cadastro!', 'error');
+            return;
+        }
+
+        if (registrationType === 'team') {
+            this.addTeam();
+        } else if (registrationType === 'student') {
+            this.addStudent();
+        }
+    }
+
+    // Cadastrar apenas times
+    addTeam() {
+        const sport = document.getElementById('teamSportSelect').value;
+        const className = document.getElementById('teamClassSelect').value;
+        const name = document.getElementById('teamName').value.trim();
+
+        if (!sport || !className || !name) {
             this.showNotification('❌ Preencha todos os campos obrigatórios!', 'error');
             return;
         }
 
-        // Validações específicas para jogador individual
-        if (playerType === 'player') {
-            if (!number || number < 1 || number > 999) {
-                this.showNotification('❌ Para jogadores individuais, o número deve estar entre 1 e 999!', 'error');
-                return;
-            }
-        }
-
         const players = this.loadPlayers();
         
-        // Verificar se o número já existe (apenas para jogadores individuais)
-        if (playerType === 'player') {
-            const existingPlayer = Object.values(players).find(player => 
-                player.number === number && player.type === 'player'
-            );
-            if (existingPlayer) {
-                this.showNotification(`❌ O número ${number} já está sendo usado por ${existingPlayer.name}!`, 'error');
-                return;
-            }
-        }
-
-        // Verificar se o nome já existe (para ambos os tipos)
-        const existingName = Object.values(players).find(player => 
+        // Verificar se o nome já existe
+        const existingTeam = Object.values(players).find(player => 
             player.name.toLowerCase() === name.toLowerCase() && 
             player.class === className &&
-            player.type === playerType
+            player.type === 'team'
         );
-        if (existingName) {
-            this.showNotification(`❌ Já existe um ${playerType === 'player' ? 'jogador' : 'time'} com o nome "${name}" nesta sala!`, 'error');
+        if (existingTeam) {
+            this.showNotification(`❌ Já existe um time com o nome "${name}" nesta sala!`, 'error');
             return;
         }
 
         // Criar ID único
-        const playerId = `${playerType}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const teamId = `team_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         
-        // Adicionar jogador/time
-        players[playerId] = {
-            id: playerId,
+        // Adicionar time
+        players[teamId] = {
+            id: teamId,
             name: name,
             class: className,
-            type: playerType
+            type: 'team',
+            sport: sport
         };
-
-        // Adicionar número apenas para jogadores individuais
-        if (playerType === 'player') {
-            players[playerId].number = number;
-        }
 
         this.savePlayers(players);
         this.updatePlayerSelects();
-        this.clearPlayerForm();
+        this.clearTeamForm();
         
-        const typeText = playerType === 'player' ? 'jogador' : 'time';
-        this.showNotification(`✅ ${typeText.charAt(0).toUpperCase() + typeText.slice(1)} ${name} cadastrado com sucesso!`, 'success');
-        this.addToHistory(`👥 ${typeText.charAt(0).toUpperCase() + typeText.slice(1)} cadastrado: ${name}${playerType === 'player' ? ` (${number})` : ''} - ${className}`);
+        this.showNotification(`✅ Time ${name} cadastrado com sucesso!`, 'success');
+        this.addToHistory(`🏆 Time cadastrado: ${name} - ${className}`);
 
         // Atualizar página principal se estiver aberta
         if (window.opener && window.opener.scoreSystem) {
             window.opener.scoreSystem.players = players;
             window.opener.scoreSystem.updateTable();
         }
+    }
+
+    clearTeamForm() {
+        document.getElementById('teamSportSelect').value = '';
+        document.getElementById('teamClassSelect').value = '';
+        document.getElementById('teamName').value = '';
+    }
+
+    // Cadastrar aluno
+    addStudent() {
+        const className = document.getElementById('studentClassSelect').value;
+        const name = document.getElementById('studentName').value.trim();
+
+        if (!className || !name) {
+            this.showNotification('❌ Preencha todos os campos obrigatórios!', 'error');
+            return;
+        }
+
+        if (!this.studentsData) {
+            this.showNotification('❌ Dados dos alunos não foram carregados!', 'error');
+            return;
+        }
+
+        // Verificar se o aluno já existe na turma
+        if (this.studentsData[className]) {
+            const existingStudent = this.studentsData[className].find(student => 
+                student.nome.toLowerCase() === name.toLowerCase()
+            );
+            
+            if (existingStudent) {
+                this.showNotification(`❌ Aluno "${name}" já está cadastrado na turma ${className}!`, 'error');
+                return;
+            }
+        }
+
+        // Gerar novo ID para o aluno
+        const maxId = Math.max(...Object.values(this.studentsData).flat().map(s => s.id), 0);
+        const newId = maxId + 1;
+
+        // Adicionar aluno ao JSON
+        if (!this.studentsData[className]) {
+            this.studentsData[className] = [];
+        }
+
+        this.studentsData[className].push({
+            id: newId,
+            nome: name
+        });
+
+        // Salvar dados atualizados
+        this.saveStudentsData();
+
+        this.clearStudentForm();
+        this.showNotification(`✅ Aluno "${name}" cadastrado com sucesso na turma ${className}!`, 'success');
+        this.addToHistory(`👤 Aluno cadastrado: ${name} - ${className}`);
+
+        // Atualizar página principal se estiver aberta
+        if (window.opener && window.opener.scoreSystem) {
+            window.opener.scoreSystem.updateTable();
+        }
+    }
+
+    clearStudentForm() {
+        document.getElementById('studentClassSelect').value = '';
+        document.getElementById('studentName').value = '';
+    }
+
+    saveStudentsData() {
+        // Salvar dados dos alunos atualizados
+        fetch('assets/alunos_por_turma.json', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(this.studentsData)
+        }).catch(error => {
+            console.error('Erro ao salvar dados dos alunos:', error);
+            // Como alternativa, salvar no localStorage para persistência local
+            localStorage.setItem('studentsData', JSON.stringify(this.studentsData));
+        });
+    }
+
+    // Função para alternar campos de cadastro
+    toggleRegistrationFields() {
+        const registrationType = document.getElementById('registrationTypeSelect').value;
+        const teamFields = document.getElementById('teamRegistrationFields');
+        const studentFields = document.getElementById('studentRegistrationFields');
+
+        // Esconder todos os campos primeiro
+        teamFields.style.display = 'none';
+        studentFields.style.display = 'none';
+
+        if (registrationType === 'team') {
+            teamFields.style.display = 'block';
+        } else if (registrationType === 'student') {
+            studentFields.style.display = 'block';
+        }
+    }
+
+    // Gerenciar alunos pré-cadastrados
+    loadStudentsFromClass() {
+        const selectedClass = document.getElementById('studentClassSelect').value;
+        const studentsList = document.getElementById('studentsList');
+        const studentsContainer = document.getElementById('studentsContainer');
+
+        console.log('Turma selecionada:', selectedClass);
+        console.log('Dados dos alunos disponíveis:', this.studentsData);
+
+        if (!selectedClass) {
+            studentsList.style.display = 'none';
+            return;
+        }
+
+        if (!this.studentsData) {
+            this.showNotification('❌ Dados dos alunos ainda não foram carregados! Aguarde um momento.', 'error');
+            return;
+        }
+
+        if (!this.studentsData[selectedClass]) {
+            console.log('Turmas disponíveis:', Object.keys(this.studentsData));
+            this.showNotification(`❌ Turma "${selectedClass}" não encontrada nos dados! Turmas disponíveis: ${Object.keys(this.studentsData).join(', ')}`, 'error');
+            return;
+        }
+
+        const students = this.studentsData[selectedClass];
+        console.log(`Alunos encontrados para ${selectedClass}:`, students);
+        
+        studentsContainer.innerHTML = '';
+
+        students.forEach(student => {
+            const studentDiv = document.createElement('div');
+            studentDiv.className = 'student-item';
+            studentDiv.innerHTML = `
+                <div class="student-info">
+                    <span class="student-name">${student.nome}</span>
+                    <span class="student-id">ID: ${student.id}</span>
+                </div>
+                <button class="btn-select-student" onclick="selectStudent(${student.id}, '${student.nome}')">
+                    Selecionar
+                </button>
+            `;
+            studentsContainer.appendChild(studentDiv);
+        });
+
+        studentsList.style.display = 'block';
+        this.showNotification(`✅ ${students.length} alunos carregados para ${selectedClass}`, 'success');
+    }
+
+    addStudentPoints() {
+        const selectedStudentId = document.getElementById('selectedStudentId')?.value;
+        const points = parseInt(document.getElementById('studentPoints').value);
+
+        if (!selectedStudentId) {
+            this.showNotification('❌ Selecione um aluno primeiro!', 'error');
+            return;
+        }
+
+        if (!points || points < 0) {
+            this.showNotification('❌ Digite uma pontuação válida!', 'error');
+            return;
+        }
+
+        // Adicionar pontos ao aluno específico
+        const studentScores = this.loadStudentScores();
+        const studentKey = `student_${selectedStudentId}`;
+        
+        if (!studentScores[studentKey]) {
+            studentScores[studentKey] = { points: 0 };
+        }
+        
+        studentScores[studentKey].points += points;
+        this.saveStudentScores(studentScores);
+
+        const studentName = document.getElementById('selectedStudentName')?.value || 'Aluno';
+        this.showNotification(`✅ ${points} pontos adicionados para ${studentName}!`, 'success');
+        this.addToHistory(`👤 ${points} pontos adicionados para aluno: ${studentName}`);
+
+        // Limpar formulário
+        document.getElementById('studentPoints').value = '0';
+        document.getElementById('selectedStudentId').value = '';
+        document.getElementById('selectedStudentName').value = '';
+        
+        // Atualizar página principal se estiver aberta
+        if (window.opener && window.opener.scoreSystem) {
+            window.opener.scoreSystem.updateTable();
+        }
+    }
+
+    loadStudentScores() {
+        const scores = localStorage.getItem('studentScores');
+        return scores ? JSON.parse(scores) : {};
+    }
+
+    saveStudentScores(scores) {
+        localStorage.setItem('studentScores', JSON.stringify(scores));
+        this.updateLastUpdate();
+    }
+
+    // Função para alternar campos de jogo
+    toggleGameFields() {
+        const gameType = document.getElementById('gameTypeSelect').value;
+        const teamFields = document.getElementById('teamFields');
+        const studentFields = document.getElementById('studentFields');
+
+        // Esconder todos os campos primeiro
+        teamFields.style.display = 'none';
+        studentFields.style.display = 'none';
+
+        if (gameType === 'team') {
+            teamFields.style.display = 'block';
+            this.updatePlayerSelects();
+        } else if (gameType === 'student') {
+            studentFields.style.display = 'block';
+        }
+    }
+
+    // Carregar alunos para o jogador 1
+    loadStudentsForPlayer1() {
+        const selectedClass = document.getElementById('student1ClassSelect').value;
+        const studentSelect = document.getElementById('student1Select');
+
+        if (!selectedClass) {
+            studentSelect.innerHTML = '<option value="">Selecione o aluno</option>';
+            return;
+        }
+
+        if (!this.studentsData || !this.studentsData[selectedClass]) {
+            studentSelect.innerHTML = '<option value="">Turma não encontrada</option>';
+            return;
+        }
+
+        const students = this.studentsData[selectedClass];
+        const studentOptions = students.map(student => 
+            `<option value="${student.id}">${student.nome}</option>`
+        ).join('');
+
+        studentSelect.innerHTML = '<option value="">Selecione o aluno</option>' + studentOptions;
+    }
+
+    // Carregar alunos para o jogador 2
+    loadStudentsForPlayer2() {
+        const selectedClass = document.getElementById('student2ClassSelect').value;
+        const studentSelect = document.getElementById('student2Select');
+
+        if (!selectedClass) {
+            studentSelect.innerHTML = '<option value="">Selecione o aluno</option>';
+            return;
+        }
+
+        if (!this.studentsData || !this.studentsData[selectedClass]) {
+            studentSelect.innerHTML = '<option value="">Turma não encontrada</option>';
+            return;
+        }
+
+        const students = this.studentsData[selectedClass];
+        const studentOptions = students.map(student => 
+            `<option value="${student.id}">${student.nome}</option>`
+        ).join('');
+
+        studentSelect.innerHTML = '<option value="">Selecione o aluno</option>' + studentOptions;
     }
 
     clearPlayerForm() {
@@ -329,15 +621,72 @@ class AdminSystem {
     }
 
     registerGame() {
+        const gameType = document.getElementById('gameTypeSelect').value;
         const sport = document.getElementById('gameSportSelect').value;
-        const player1Id = document.getElementById('player1Select').value;
-        const player2Id = document.getElementById('player2Select').value;
         const player1Score = parseInt(document.getElementById('player1Score').value);
         const player2Score = parseInt(document.getElementById('player2Score').value);
+        const player1BonusPoints = parseInt(document.getElementById('player1BonusPoints').value) || 0;
+        const player2BonusPoints = parseInt(document.getElementById('player2BonusPoints').value) || 0;
 
-        if (!sport || !player1Id || !player2Id) {
-            this.showNotification('❌ Selecione o esporte e os dois jogadores!', 'error');
+        if (!gameType || !sport) {
+            this.showNotification('❌ Selecione o tipo de jogo e o esporte!', 'error');
             return;
+        }
+
+        let player1Id, player2Id, player1Name, player2Name;
+
+        if (gameType === 'team') {
+            player1Id = document.getElementById('player1Select').value;
+            player2Id = document.getElementById('player2Select').value;
+            
+            if (!player1Id || !player2Id) {
+                this.showNotification('❌ Selecione os dois times!', 'error');
+                return;
+            }
+
+            const players = this.loadPlayers();
+            const player1 = players[player1Id];
+            const player2 = players[player2Id];
+            
+            if (!player1 || !player2) {
+                this.showNotification('❌ Time não encontrado!', 'error');
+                return;
+            }
+
+            player1Name = player1.name;
+            player2Name = player2.name;
+        } else if (gameType === 'student') {
+            const student1Id = document.getElementById('student1Select').value;
+            const student2Id = document.getElementById('student2Select').value;
+            
+            if (!student1Id || !student2Id) {
+                this.showNotification('❌ Selecione os dois alunos!', 'error');
+                return;
+            }
+
+            // Para alunos, vamos usar IDs únicos baseados no ID do aluno
+            player1Id = `student_${student1Id}`;
+            player2Id = `student_${student2Id}`;
+
+            // Buscar nomes dos alunos
+            const student1Class = document.getElementById('student1ClassSelect').value;
+            const student2Class = document.getElementById('student2ClassSelect').value;
+            
+            if (!this.studentsData || !this.studentsData[student1Class] || !this.studentsData[student2Class]) {
+                this.showNotification('❌ Dados dos alunos não encontrados!', 'error');
+                return;
+            }
+
+            const student1 = this.studentsData[student1Class].find(s => s.id == student1Id);
+            const student2 = this.studentsData[student2Class].find(s => s.id == student2Id);
+            
+            if (!student1 || !student2) {
+                this.showNotification('❌ Aluno não encontrado!', 'error');
+                return;
+            }
+
+            player1Name = student1.nome;
+            player2Name = student2.nome;
         }
 
         if (player1Id === player2Id) {
@@ -350,15 +699,6 @@ class AdminSystem {
             return;
         }
 
-        const players = this.loadPlayers();
-        const player1 = players[player1Id];
-        const player2 = players[player2Id];
-
-        if (!player1 || !player2) {
-            this.showNotification('❌ Jogador não encontrado!', 'error');
-            return;
-        }
-
         const games = this.loadGames();
         
         // Criar ID único para o jogo
@@ -367,11 +707,14 @@ class AdminSystem {
         // Adicionar jogo
         games.push({
             id: gameId,
+            gameType: gameType,
             sport: sport,
             player1Id: player1Id,
             player2Id: player2Id,
             player1Score: player1Score,
             player2Score: player2Score,
+            player1BonusPoints: player1BonusPoints,
+            player2BonusPoints: player2BonusPoints,
             timestamp: new Date().toISOString()
         });
 
@@ -381,15 +724,15 @@ class AdminSystem {
         // Determinar resultado
         let result;
         if (player1Score > player2Score) {
-            result = `${player1.name} venceu ${player1Score} x ${player2Score}`;
+            result = `${player1Name} venceu ${player1Score} x ${player2Score}`;
         } else if (player2Score > player1Score) {
-            result = `${player2.name} venceu ${player2Score} x ${player1Score}`;
+            result = `${player2Name} venceu ${player2Score} x ${player1Score}`;
         } else {
             result = `Empate ${player1Score} x ${player2Score}`;
         }
 
         this.showNotification(`✅ Jogo registrado: ${result}`, 'success');
-        this.addToHistory(`⚽ Jogo registrado: ${player1.name} ${player1Score} x ${player2Score} ${player2.name} (${sport})`);
+        this.addToHistory(`⚽ Jogo registrado: ${player1Name} ${player1Score} x ${player2Score} ${player2Name} (${sport})`);
 
         // Atualizar página principal se estiver aberta
         if (window.opener && window.opener.scoreSystem) {
@@ -399,11 +742,22 @@ class AdminSystem {
     }
 
     clearGameForm() {
+        document.getElementById('gameTypeSelect').value = '';
         document.getElementById('gameSportSelect').value = '';
         document.getElementById('player1Select').value = '';
         document.getElementById('player2Select').value = '';
+        document.getElementById('student1ClassSelect').value = '';
+        document.getElementById('student1Select').value = '';
+        document.getElementById('student2ClassSelect').value = '';
+        document.getElementById('student2Select').value = '';
         document.getElementById('player1Score').value = '0';
         document.getElementById('player2Score').value = '0';
+        document.getElementById('player1BonusPoints').value = '0';
+        document.getElementById('player2BonusPoints').value = '0';
+        
+        // Esconder todos os campos específicos
+        document.getElementById('teamFields').style.display = 'none';
+        document.getElementById('studentFields').style.display = 'none';
     }
 
     // ===== SISTEMA ANTIGO (MANTIDO PARA COMPATIBILIDADE) =====
@@ -411,10 +765,15 @@ class AdminSystem {
     addScore() {
         const sport = document.getElementById('sportSelect').value;
         const className = document.getElementById('classSelect').value;
-        const points = parseInt(document.getElementById('pointsInput').value);
+        const points = parseInt(document.getElementById('pointsInput').value) || 0;
 
-        if (!sport || !className || points < 0) {
-            this.showNotification('❌ Preencha todos os campos corretamente!', 'error');
+        if (!sport || !className) {
+            this.showNotification('❌ Selecione o tipo de pontuação e a turma!', 'error');
+            return;
+        }
+
+        if (points <= 0) {
+            this.showNotification('❌ Adicione pelo menos alguns pontos!', 'error');
             return;
         }
 
@@ -426,6 +785,7 @@ class AdminSystem {
         }
 
         this.clearForm();
+        
         this.showNotification(`✅ ${points} pontos adicionados para ${className} em ${sport}!`, 'success');
         this.addToHistory(`📊 ${points} pontos adicionados: ${className} - ${sport}`);
     }
@@ -464,16 +824,76 @@ window.addScore = function() {
     window.adminSystem.addScore();
 };
 
-window.addPlayer = function() {
-    window.adminSystem.addPlayer();
+window.addRegistration = function() {
+    window.adminSystem.addRegistration();
+};
+
+window.addTeam = function() {
+    window.adminSystem.addTeam();
+};
+
+window.addStudent = function() {
+    window.adminSystem.addStudent();
+};
+
+window.toggleRegistrationFields = function() {
+    window.adminSystem.toggleRegistrationFields();
+};
+
+window.loadStudentsFromClass = function() {
+    window.adminSystem.loadStudentsFromClass();
+};
+
+window.addStudentPoints = function() {
+    window.adminSystem.addStudentPoints();
+};
+
+window.selectStudent = function(studentId, studentName) {
+    // Criar campos ocultos para armazenar o aluno selecionado
+    let selectedStudentIdField = document.getElementById('selectedStudentId');
+    let selectedStudentNameField = document.getElementById('selectedStudentName');
+    
+    if (!selectedStudentIdField) {
+        selectedStudentIdField = document.createElement('input');
+        selectedStudentIdField.type = 'hidden';
+        selectedStudentIdField.id = 'selectedStudentId';
+        document.body.appendChild(selectedStudentIdField);
+    }
+    
+    if (!selectedStudentNameField) {
+        selectedStudentNameField = document.createElement('input');
+        selectedStudentNameField.type = 'hidden';
+        selectedStudentNameField.id = 'selectedStudentName';
+        document.body.appendChild(selectedStudentNameField);
+    }
+    
+    selectedStudentIdField.value = studentId;
+    selectedStudentNameField.value = studentName;
+    
+    // Destacar o aluno selecionado
+    document.querySelectorAll('.student-item').forEach(item => {
+        item.classList.remove('selected');
+    });
+    
+    event.target.closest('.student-item').classList.add('selected');
+    
+    window.adminSystem.showNotification(`✅ Aluno ${studentName} selecionado!`, 'success');
 };
 
 window.registerGame = function() {
     window.adminSystem.registerGame();
 };
 
-window.togglePlayerFields = function() {
-    window.adminSystem.togglePlayerFields();
+window.toggleGameFields = function() {
+    window.adminSystem.toggleGameFields();
+};
+
+window.loadStudentsForPlayer1 = function() {
+    window.adminSystem.loadStudentsForPlayer1();
+};
+
+window.loadStudentsForPlayer2 = function() {
+    window.adminSystem.loadStudentsForPlayer2();
 };
 
 // Inicializar o sistema quando a página carregar

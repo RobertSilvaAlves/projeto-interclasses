@@ -34,23 +34,40 @@
 
         <!-- Painel Administrativo -->
         <div id="adminPanel" class="admin-panel" style="display: none;">
-            <!-- Cadastro de Jogadores -->
+            <!-- Cadastro de Times e Alunos -->
             <div class="admin-section">
-                <h2>👥 Cadastrar Jogador ou Time</h2>
+                <h2>🏆 Cadastrar Time ou Aluno</h2>
                 
                 <div class="form-group">
-                    <label for="playerTypeSelect">Tipo de Cadastro:</label>
-                    <select id="playerTypeSelect" required onchange="togglePlayerFields()">
+                    <label for="registrationTypeSelect">Tipo de Cadastro:</label>
+                    <select id="registrationTypeSelect" required onchange="toggleRegistrationFields()">
                         <option value="">Selecione o tipo</option>
-                        <option value="player">👤 Jogador Individual</option>
                         <option value="team">🏆 Time</option>
+                        <option value="student">👤 Aluno</option>
                     </select>
                 </div>
 
-                <div class="form-group">
-                    <label for="playerClassSelect">Sala do Jogador/Time:</label>
-                    <select id="playerClassSelect" required>
-                        <option value="">Selecione a sala</option>
+                <!-- Campos para Times -->
+                <div id="teamRegistrationFields" style="display: none;">
+                    <div class="form-group">
+                        <label for="teamSportSelect">Esporte:</label>
+                        <select id="teamSportSelect" required>
+                            <option value="">Selecione o esporte</option>
+                            <option value="futebol">⚽ Futebol</option>
+                            <option value="dama">♟️ Dama</option>
+                            <option value="kings-league">♔ Kings League</option>
+                            <option value="pique-bandeira">🏁 Pique Bandeira</option>
+                            <option value="volei">🏐 Vôlei</option>
+                            <option value="basquete">🏀 Basquete</option>
+                            <option value="futvolei">🏐 Futvôlei</option>
+                            <option value="handbol">🤾‍♂️ Handbol</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="teamClassSelect">Sala do Time:</label>
+                        <select id="teamClassSelect" required>
+                            <option value="">Selecione a sala</option>
                         <!-- 1º Ano -->
                         <optgroup label="1º Ano">
                             <option value="1A">1º Ano A</option>
@@ -162,19 +179,106 @@
                     </select>
                 </div>
 
+                    <div class="form-group">
+                        <label for="teamName">Nome do Time:</label>
+                        <input type="text" id="teamName" placeholder="Nome do time" maxlength="50" required>
+                        <small>Ex: Time A, Time B, etc.</small>
+                    </div>
+                </div>
+
+                <!-- Campos para Alunos -->
+                <div id="studentRegistrationFields" style="display: none;">
+                    <div class="form-group">
+                        <label for="studentClassSelect">Sala do Aluno:</label>
+                        <select id="studentClassSelect" required>
+                            <option value="">Selecione a sala</option>
+                            <option value="1° ano A">1º Ano A</option>
+                            <option value="1° ano B">1º Ano B</option>
+                            <option value="2° ano A">2º Ano A</option>
+                            <option value="2° ano B">2º Ano B</option>
+                            <option value="3° ano A">3º Ano A</option>
+                            <option value="3º ano B">3º Ano B</option>
+                            <option value="4° ano A">4º Ano A</option>
+                            <option value="5º Ano A">5º Ano A</option>
+                            <option value="6º Ano A">6º Ano A</option>
+                            <option value="7º Ano A">7º Ano A</option>
+                            <option value="8º Ano A">8º Ano A</option>
+                            <option value="9º Ano A">9º Ano A</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="studentName">Nome do Aluno:</label>
+                        <input type="text" id="studentName" placeholder="Nome completo do aluno" maxlength="100" required>
+                        <small>Digite o nome completo do aluno</small>
+                    </div>
+                </div>
+
+                <button onclick="addRegistration()" class="btn-primary">➕ Cadastrar</button>
+            </div>
+
+            <!-- Gerenciamento de Alunos -->
+            <div class="admin-section">
+                <h2>👥 Gerenciar Alunos</h2>
+                
                 <div class="form-group">
-                    <label for="playerName">Nome do Jogador ou Time:</label>
-                    <input type="text" id="playerName" placeholder="Nome completo do jogador ou nome do time" maxlength="50" required>
-                    <small>Ex: João Silva, Maria Santos, Time A, etc.</small>
+                    <label for="studentClassSelect">Selecionar Turma:</label>
+                    <select id="studentClassSelect" onchange="loadStudentsFromClass()">
+                        <option value="">Selecione a turma</option>
+                        <!-- 1º Ano -->
+                        <optgroup label="1º Ano">
+                            <option value="1° ano A">1º Ano A</option>
+                            <option value="1° ano B">1º Ano B</option>
+                        </optgroup>
+                        <!-- 2º Ano -->
+                        <optgroup label="2º Ano">
+                            <option value="2° ano A">2º Ano A</option>
+                            <option value="2° ano B">2º Ano B</option>
+                        </optgroup>
+                        <!-- 3º Ano -->
+                        <optgroup label="3º Ano">
+                            <option value="3° ano A">3º Ano A</option>
+                            <option value="3º ano B">3º Ano B</option>
+                        </optgroup>
+                        <!-- 4º Ano -->
+                        <optgroup label="4º Ano">
+                            <option value="4° ano A">4º Ano A</option>
+                        </optgroup>
+                        <!-- 5º Ano -->
+                        <optgroup label="5º Ano">
+                            <option value="5º Ano A">5º Ano A</option>
+                        </optgroup>
+                        <!-- 6º Ano -->
+                        <optgroup label="6º Ano">
+                            <option value="6º Ano A">6º Ano A</option>
+                        </optgroup>
+                        <!-- 7º Ano -->
+                        <optgroup label="7º Ano">
+                            <option value="7º Ano A">7º Ano A</option>
+                        </optgroup>
+                        <!-- 8º Ano -->
+                        <optgroup label="8º Ano">
+                            <option value="8º Ano A">8º Ano A</option>
+                        </optgroup>
+                        <!-- 9º Ano -->
+                        <optgroup label="9º Ano">
+                            <option value="9º Ano A">9º Ano A</option>
+                        </optgroup>
+                    </select>
                 </div>
 
-                <div class="form-group" id="playerNumberGroup" style="display: none;">
-                    <label for="playerNumber">Número do Jogador:</label>
-                    <input type="number" id="playerNumber" placeholder="Número da camisa" min="1" max="999" value="">
-                    <small>Número único para identificação (1-999) - Apenas para jogadores individuais</small>
+                <div id="studentsList" class="students-list" style="display: none;">
+                    <h3>Alunos da Turma:</h3>
+                    <div id="studentsContainer"></div>
                 </div>
 
-                <button onclick="addPlayer()" class="btn-primary">➕ Cadastrar Jogador/Time</button>
+                <div class="form-group">
+                    <label for="studentPoints">Pontos para Aluno:</label>
+                    <input type="number" id="studentPoints" placeholder="0" min="0" max="10000" value="0">
+                    <small>Pontos extras para aluno específico</small>
+                </div>
+
+                <button onclick="addStudentPoints()" class="btn-primary">➕ Adicionar Pontos ao Aluno</button>
             </div>
 
             <!-- Registro de Jogos -->
@@ -182,32 +286,103 @@
                 <h2>⚽ Registrar Jogo</h2>
                 
                 <div class="form-group">
+                    <label for="gameTypeSelect">Tipo de Jogo:</label>
+                    <select id="gameTypeSelect" required onchange="toggleGameFields()">
+                        <option value="">Selecione o tipo</option>
+                        <option value="team">🏆 Time vs Time</option>
+                        <option value="student">👤 Aluno vs Aluno</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
                     <label for="gameSportSelect">Esporte:</label>
                     <select id="gameSportSelect" required>
                         <option value="">Selecione o esporte</option>
                         <option value="futebol">⚽ Futebol</option>
                         <option value="dama">♟️ Dama</option>
-                        <option value="xadrez">♔ Xadrez</option>
+                        <option value="kings-league">♔ Kings League</option>
                         <option value="pique-bandeira">🏁 Pique Bandeira</option>
                         <option value="volei">🏐 Vôlei</option>
                         <option value="basquete">🏀 Basquete</option>
+                        <option value="futvolei">🏐 Futvôlei</option>
+                        <option value="handbol">🤾‍♂️ Handbol</option>
                     </select>
                 </div>
 
-                <div class="form-group">
-                    <label for="player1Select">Jogador 1:</label>
-                    <select id="player1Select" required>
-                        <option value="">Selecione o jogador</option>
-                        <!-- Opções serão carregadas dinamicamente -->
-                    </select>
+                <!-- Campos para Times -->
+                <div id="teamFields" style="display: none;">
+                    <div class="form-group">
+                        <label for="player1Select">Time 1:</label>
+                        <select id="player1Select">
+                            <option value="">Selecione o time</option>
+                            <!-- Opções serão carregadas dinamicamente -->
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="player2Select">Time 2:</label>
+                        <select id="player2Select">
+                            <option value="">Selecione o time</option>
+                            <!-- Opções serão carregadas dinamicamente -->
+                        </select>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="player2Select">Jogador 2:</label>
-                    <select id="player2Select" required>
-                        <option value="">Selecione o jogador</option>
-                        <!-- Opções serão carregadas dinamicamente -->
-                    </select>
+                <!-- Campos para Alunos -->
+                <div id="studentFields" style="display: none;">
+                    <div class="form-group">
+                        <label for="student1ClassSelect">Sala do Jogador 1:</label>
+                        <select id="student1ClassSelect" onchange="loadStudentsForPlayer1()">
+                            <option value="">Selecione a sala</option>
+                            <option value="1° ano A">1º Ano A</option>
+                            <option value="1° ano B">1º Ano B</option>
+                            <option value="2° ano A">2º Ano A</option>
+                            <option value="2° ano B">2º Ano B</option>
+                            <option value="3° ano A">3º Ano A</option>
+                            <option value="3º ano B">3º Ano B</option>
+                            <option value="4° ano A">4º Ano A</option>
+                            <option value="5º Ano A">5º Ano A</option>
+                            <option value="6º Ano A">6º Ano A</option>
+                            <option value="7º Ano A">7º Ano A</option>
+                            <option value="8º Ano A">8º Ano A</option>
+                            <option value="9º Ano A">9º Ano A</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="student1Select">Jogador 1:</label>
+                        <select id="student1Select">
+                            <option value="">Selecione o aluno</option>
+                            <!-- Opções serão carregadas dinamicamente -->
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="student2ClassSelect">Sala do Jogador 2:</label>
+                        <select id="student2ClassSelect" onchange="loadStudentsForPlayer2()">
+                            <option value="">Selecione a sala</option>
+                            <option value="1° ano A">1º Ano A</option>
+                            <option value="1° ano B">1º Ano B</option>
+                            <option value="2° ano A">2º Ano A</option>
+                            <option value="2° ano B">2º Ano B</option>
+                            <option value="3° ano A">3º Ano A</option>
+                            <option value="3º ano B">3º Ano B</option>
+                            <option value="4° ano A">4º Ano A</option>
+                            <option value="5º Ano A">5º Ano A</option>
+                            <option value="6º Ano A">6º Ano A</option>
+                            <option value="7º Ano A">7º Ano A</option>
+                            <option value="8º Ano A">8º Ano A</option>
+                            <option value="9º Ano A">9º Ano A</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="student2Select">Jogador 2:</label>
+                        <select id="student2Select">
+                            <option value="">Selecione o aluno</option>
+                            <!-- Opções serão carregadas dinamicamente -->
+                        </select>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -220,23 +395,40 @@
                     <input type="number" id="player2Score" placeholder="100 = Vitória, 50 = Empate, 0 = Derrota" min="0" max="999" value="0" required>
                 </div>
 
+                <div class="form-group">
+                    <label for="player1BonusPoints">Pontos Extras Jogador 1:</label>
+                    <input type="number" id="player1BonusPoints" placeholder="0" min="0" max="10000" value="0">
+                    <small>Pontos extras para o jogador/time 1</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="player2BonusPoints">Pontos Extras Jogador 2:</label>
+                    <input type="number" id="player2BonusPoints" placeholder="0" min="0" max="10000" value="0">
+                    <small>Pontos extras para o jogador/time 2</small>
+                </div>
+
                 <button onclick="registerGame()" class="btn-primary">⚽ Registrar Jogo</button>
             </div>
 
-            <!-- Sistema de Pontuação Antigo (Mantido para Compatibilidade) -->
+            <!-- Sistema de Pontuação -->
             <div class="admin-section">
-                <h2>📊 Adicionar Pontuação (Sistema Antigo)</h2>
+                <h2>📊 Adicionar Pontuação</h2>
                 
                 <div class="form-group">
-                    <label for="sportSelect">Esporte:</label>
+                    <label for="sportSelect">Tipo de Pontuação:</label>
                     <select id="sportSelect" required>
-                        <option value="">Selecione o esporte</option>
+                        <option value="">Selecione o tipo</option>
                         <option value="futebol">⚽ Futebol</option>
                         <option value="dama">♟️ Dama</option>
-                        <option value="xadrez">♔ Xadrez</option>
+                        <option value="kings-league">♔ Kings League</option>
                         <option value="pique-bandeira">🏁 Pique Bandeira</option>
                         <option value="volei">🏐 Vôlei</option>
                         <option value="basquete">🏀 Basquete</option>
+                        <option value="futvolei">🏐 Futvôlei</option>
+                        <option value="handbol">🤾‍♂️ Handbol</option>
+                        <option value="prova-nacional">🏆 Prova Nacional</option>
+                        <option value="organizacao">📋 Organização</option>
+                        <option value="destaque-turma">⭐ Destaque da Turma</option>
                     </select>
                 </div>
 

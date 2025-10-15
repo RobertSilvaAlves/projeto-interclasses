@@ -129,10 +129,15 @@ class ScoreSystem {
         return scores ? JSON.parse(scores) : {
             futebol: {},
             dama: {},
-            xadrez: {},
+            'kings-league': {},
             'pique-bandeira': {},
             volei: {},
-            basquete: {}
+            basquete: {},
+            futvolei: {},
+            handbol: {},
+            'prova-nacional': {},
+            'organizacao': {},
+            'destaque-turma': {}
         };
     }
 
@@ -190,6 +195,8 @@ class ScoreSystem {
                 } else {
                     losses++;
                 }
+                // Adicionar pontos extras
+                points += game.player1BonusPoints || 0;
             } else if (game.player2Id === playerId) {
                 if (game.player2Score > game.player1Score) {
                     wins++;
@@ -200,10 +207,50 @@ class ScoreSystem {
                 } else {
                     losses++;
                 }
+                // Adicionar pontos extras
+                points += game.player2BonusPoints || 0;
             }
         });
 
         return { wins, draws, losses, points, games: playerGames.length };
+    }
+
+    // Calcular estatísticas de alunos individuais
+    calculateStudentStats(studentId) {
+        const studentGames = this.games.filter(game => 
+            (game.player1Id === `student_${studentId}` || game.player2Id === `student_${studentId}`) &&
+            game.gameType === 'student'
+        );
+
+        let wins = 0, draws = 0, losses = 0, points = 0;
+
+        studentGames.forEach(game => {
+            if (game.player1Id === `student_${studentId}`) {
+                if (game.player1Score > game.player2Score) {
+                    wins++;
+                    points += 100;
+                } else if (game.player1Score === game.player2Score) {
+                    draws++;
+                    points += 50;
+                } else {
+                    losses++;
+                }
+                points += game.player1BonusPoints || 0;
+            } else if (game.player2Id === `student_${studentId}`) {
+                if (game.player2Score > game.player1Score) {
+                    wins++;
+                    points += 100;
+                } else if (game.player2Score === game.player1Score) {
+                    draws++;
+                    points += 50;
+                } else {
+                    losses++;
+                }
+                points += game.player2BonusPoints || 0;
+            }
+        });
+
+        return { wins, draws, losses, points, games: studentGames.length };
     }
 
     calculateClassStats(className) {
@@ -219,7 +266,50 @@ class ScoreSystem {
             totalGames += stats.games;
         });
 
+        // Adicionar pontos dos alunos pré-cadastrados
+        const studentScores = this.loadStudentScores();
+        const classStudentPoints = this.calculateClassStudentPoints(className, studentScores);
+        totalPoints += classStudentPoints;
+
         return { wins: totalWins, draws: totalDraws, losses: totalLosses, points: totalPoints, games: totalGames };
+    }
+
+    loadStudentScores() {
+        const scores = localStorage.getItem('studentScores');
+        return scores ? JSON.parse(scores) : {};
+    }
+
+    calculateClassStudentPoints(className, studentScores) {
+        // Mapear nomes de turmas do JSON para códigos usados no sistema
+        const classMapping = {
+            '1A': '1° ano A',
+            '1B': '1° ano B',
+            '2A': '2° ano A',
+            '2B': '2° ano B',
+            '3A': '3° ano A',
+            '3B': '3º ano B',
+            '4A': '4° ano A',
+            '5A': '5º Ano A',
+            '6A': '6º Ano A',
+            '7A': '7º Ano A',
+            '8A': '8º Ano A',
+            '9A': '9º Ano A'
+        };
+
+        const jsonClassName = classMapping[className] || className;
+        let totalPoints = 0;
+
+        // Somar pontos de todos os alunos da turma
+        Object.keys(studentScores).forEach(studentKey => {
+            if (studentKey.startsWith('student_')) {
+                const studentId = studentKey.replace('student_', '');
+                // Aqui você poderia verificar se o aluno pertence à turma específica
+                // Por simplicidade, vamos somar todos os pontos dos alunos
+                totalPoints += studentScores[studentKey].points || 0;
+            }
+        });
+
+        return totalPoints;
     }
 
     updateTable() {

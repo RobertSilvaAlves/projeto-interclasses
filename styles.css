@@ -1577,3 +1577,120 @@ tr.bronze {
     left: 100%;
 }
 
+/* Estilos para gerenciamento de alunos */
+.students-list {
+    margin: 20px 0;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.students-list h3 {
+    color: white;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+}
+
+.student-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    margin: 8px 0;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.student-item:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.student-item.selected {
+    background: rgba(255, 215, 0, 0.3);
+    border-color: #ffd700;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+}
+
+.student-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.student-name {
+    color: rgb(0, 0, 0);
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.student-id {
+    color: rgba(0, 0, 0, 0.7);
+    font-size: 0.8rem;
+}
+
+.btn-select-student {
+    background: linear-gradient(135deg, #4ecdc4, #45b7d1);
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.btn-select-student:hover {
+    background: linear-gradient(135deg, #45b7d1, #4ecdc4);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(69, 183, 209, 0.4);
+}
+
+/* Estilos para campos de pontuação especial */
+.form-group input[type="number"] {
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid rgba(255, 107, 53, 0.3);
+    border-radius: 10px;
+    padding: 12px 15px;
+    font-size: 1rem;
+    color: #333;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.form-group input[type="number"]:focus {
+    outline: none;
+    border-color: #ff6b35;
+    box-shadow: 0 0 15px rgba(255, 107, 53, 0.3);
+    background: white;
+}
+
+.form-group small {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.85rem;
+    margin-top: 5px;
+    display: block;
+}
+
+/* Responsividade para lista de alunos */
+@media (max-width: 768px) {
+    .student-item {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+    
+    .student-info {
+        align-items: center;
+    }
+    
+    .btn-select-student {
+        width: 100%;
+    }
+}
+
