@@ -10,6 +10,7 @@ class ScoreSystem {
         this.setupEventListeners();
         this.updateTable();
         this.startAutoRefresh();
+        console.log('[ScoreSystem] inicializado. games:', this.games.length, 'players:', Object.keys(this.players).length);
     }
 
     setupEventListeners() {
@@ -55,7 +56,9 @@ class ScoreSystem {
 
         // Event listener para atualizações de storage
         window.addEventListener('storage', (e) => {
-            if (e.key === 'scores' || e.key === 'players' || e.key === 'games' || e.key === 'lastUpdate') {
+            console.log('[ScoreSystem] storage event recebido:', e.key, e.newValue ? e.newValue.substring(0,100) : null);
+            // Recarrega quando scores/players/games/lastUpdate/ studentScores mudarem
+            if (e.key === 'scores' || e.key === 'players' || e.key === 'games' || e.key === 'lastUpdate' || e.key === 'studentScores' || e.key === '__students_update_ts') {
                 this.scores = this.loadScores();
                 this.players = this.loadPlayers();
                 this.games = this.loadGames();
@@ -63,6 +66,50 @@ class ScoreSystem {
                 this.updateLastUpdate();
             }
         });
+
+        // Guard para evitar recursão nas atualizações de storage
+        let isHandlingStorage = false;
+
+        // Listener específico para storage que pode vir da mesma aba (fallback)
+        try {
+            const originalSetItem = localStorage.setItem.bind(localStorage);
+            localStorage.setItem = (k, v) => {
+                // Chama a implementação original primeiro
+                originalSetItem(k, v);
+
+                // Evita recursão: se já estivermos processando um evento de storage, retorna
+                if (isHandlingStorage) {
+                    console.log('[ScoreSystem] Evitando recursão para:', k);
+                    return;
+                }
+
+                try {
+                    isHandlingStorage = true;
+                    if (k === 'studentScores' || k === 'scores' || k === 'players' || k === 'games' || k === 'lastUpdate') {
+                        // Se a chave lastUpdate foi atualizada diretamente, não recarrega
+                        if (k === 'lastUpdate') {
+                            const lastUpdateElement = document.getElementById('lastUpdate');
+                            if (lastUpdateElement) {
+                                lastUpdateElement.textContent = v;
+                            }
+                        } else {
+                            this.scores = this.loadScores();
+                            this.players = this.loadPlayers();
+                            this.games = this.loadGames();
+                            console.log('[ScoreSystem] setItem interceptado para', k);
+                            this.updateTable();
+                            this.updateLastUpdate();
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Erro ao reagir a setItem interceptado', e);
+                } finally {
+                    isHandlingStorage = false;
+                }
+            };
+        } catch (e) {
+            console.warn('Não foi possível sobrescrever localStorage.setItem:', e);
+        }
 
         // Event listener para quando a janela ganha foco
         window.addEventListener('focus', () => {
@@ -148,7 +195,10 @@ class ScoreSystem {
 
     loadGames() {
         const games = localStorage.getItem('games');
-        return games ? JSON.parse(games) : [];
+        const parsed = games ? JSON.parse(games) : [];
+        console.log('[ScoreSystem] loadGames() carregou', parsed.length, 'jogos:', 
+            parsed.map(g => `${g.gameType}/${g.sport}: ${g.player1Id} ${g.player1Score} x ${g.player2Score} ${g.player2Id}`));
+        return parsed;
     }
 
     saveScores() {
@@ -166,14 +216,28 @@ class ScoreSystem {
         this.updateLastUpdate();
     }
 
+    // Flag para evitar recursão infinita no updateLastUpdate
+    _isUpdatingLastUpdate = false;
+
     updateLastUpdate() {
-        const now = new Date();
-        const lastUpdate = now.toLocaleString('pt-BR');
-        localStorage.setItem('lastUpdate', lastUpdate);
-        
-        const lastUpdateElement = document.getElementById('lastUpdate');
-        if (lastUpdateElement) {
-            lastUpdateElement.textContent = lastUpdate;
+        // Se já estiver atualizando, retorna para evitar recursão
+        if (this._isUpdatingLastUpdate) {
+            console.log('[ScoreSystem] updateLastUpdate: evitando recursão');
+            return;
+        }
+
+        try {
+            this._isUpdatingLastUpdate = true;
+            const now = new Date();
+            const lastUpdate = now.toLocaleString('pt-BR');
+            localStorage.setItem('lastUpdate', lastUpdate);
+            
+            const lastUpdateElement = document.getElementById('lastUpdate');
+            if (lastUpdateElement) {
+                lastUpdateElement.textContent = lastUpdate;
+            }
+        } finally {
+            this._isUpdatingLastUpdate = false;
         }
     }
 
@@ -181,37 +245,71 @@ class ScoreSystem {
         const playerGames = this.games.filter(game => 
             game.player1Id === playerId || game.player2Id === playerId
         );
+        console.log('[ScoreSystem] calculatePlayerStats para', playerId, 'encontrou', playerGames.length, 'jogos');
 
         let wins = 0, draws = 0, losses = 0, points = 0;
 
+        // Normalizar nomes de esportes para bater com os filtros da UI
+        const sportMapping = {
+            'futebol': 'futsal',
+            'futsal': 'futsal',
+            'dama': 'dama',
+            'kings-league': 'kings-league',
+            'pique-bandeira': 'pique-bandeira',
+            'volei': 'volei',
+            'basquete': 'basquete',
+            'futvolei': 'futvolei',
+            'handbol': 'handbol',
+            'queimada': 'queimada'
+        };
+
         playerGames.forEach(game => {
+            // Normalizar sport do jogo
+            const normalizedSport = sportMapping[game.sport] || game.sport;
+            // Se estamos filtrando por esporte e não é o esporte atual, pula
+            if (this.currentSport !== 'geral' && normalizedSport !== this.currentSport) {
+                console.log('[ScoreSystem] Jogo', game.id, 'ignorado: esporte', normalizedSport, 'diferente do atual', this.currentSport);
+                return;
+            }
+
+            let matchPoints = 0;
+            let matchWon = false;
+            let matchDraw = false;
+
             if (game.player1Id === playerId) {
                 if (game.player1Score > game.player2Score) {
                     wins++;
-                    points += 100;
+                    matchWon = true;
                 } else if (game.player1Score === game.player2Score) {
                     draws++;
-                    points += 50;
+                    matchDraw = true;
                 } else {
                     losses++;
                 }
-                // Adicionar pontos extras
-                points += game.player1BonusPoints || 0;
+                // Usar pontuação atribuída no registro
+                matchPoints = game.player1BonusPoints || 0;
             } else if (game.player2Id === playerId) {
                 if (game.player2Score > game.player1Score) {
                     wins++;
-                    points += 100;
-                } else if (game.player2Score === game.player1Score) {
+                    matchWon = true;
+                } else if (game.player2Score === game.player2Score) {
                     draws++;
-                    points += 50;
+                    matchDraw = true;
                 } else {
                     losses++;
                 }
-                // Adicionar pontos extras
-                points += game.player2BonusPoints || 0;
+                // Usar pontuação atribuída no registro
+                matchPoints = game.player2BonusPoints || 0;
             }
+
+            console.log('[ScoreSystem] Jogo', game.id, 'computado:', normalizedSport, 
+                '- Pontos:', matchPoints,
+                matchWon ? '(vitória)' : matchDraw ? '(empate)' : '(derrota)',
+                game.player1Id === playerId ? `P1 (${game.player1Score} x ${game.player2Score})` : `P2 (${game.player2Score} x ${game.player1Score})`);
+            points += matchPoints;
         });
 
+        console.log('[ScoreSystem] Total para player', playerId, ':', points, 'pts,', wins, 'V', draws, 'E', losses, 'D');
         return { wins, draws, losses, points, games: playerGames.length };
     }
 
@@ -221,35 +319,71 @@ class ScoreSystem {
             (game.player1Id === `student_${studentId}` || game.player2Id === `student_${studentId}`) &&
             game.gameType === 'student'
         );
+        console.log('[ScoreSystem] calculateStudentStats para student_' + studentId, 'encontrou', studentGames.length, 'jogos');
 
         let wins = 0, draws = 0, losses = 0, points = 0;
 
+        // Usar mesmo mapeamento de esportes que calculatePlayerStats
+        const sportMapping = {
+            'futebol': 'futsal',
+            'futsal': 'futsal',
+            'dama': 'dama',
+            'kings-league': 'kings-league',
+            'pique-bandeira': 'pique-bandeira',
+            'volei': 'volei',
+            'basquete': 'basquete',
+            'futvolei': 'futvolei',
+            'handbol': 'handbol',
+            'queimada': 'queimada'
+        };
+
         studentGames.forEach(game => {
+            // Normalizar sport do jogo
+            const normalizedSport = sportMapping[game.sport] || game.sport;
+            // Se estamos filtrando por esporte e não é o esporte atual, pula
+            if (this.currentSport !== 'geral' && normalizedSport !== this.currentSport) {
+                console.log('[ScoreSystem] Jogo estudante', game.id, 'ignorado: esporte', normalizedSport, 'diferente do atual', this.currentSport);
+                return;
+            }
+
+            let matchPoints = 0;
+            let matchWon = false;
+            let matchDraw = false;
+
             if (game.player1Id === `student_${studentId}`) {
                 if (game.player1Score > game.player2Score) {
                     wins++;
-                    points += 100;
+                    matchWon = true;
                 } else if (game.player1Score === game.player2Score) {
                     draws++;
-                    points += 50;
+                    matchDraw = true;
                 } else {
                     losses++;
                 }
-                points += game.player1BonusPoints || 0;
+                // Usar pontuação atribuída no registro
+                matchPoints = game.player1BonusPoints || 0;
             } else if (game.player2Id === `student_${studentId}`) {
                 if (game.player2Score > game.player1Score) {
                     wins++;
-                    points += 100;
+                    matchWon = true;
                 } else if (game.player2Score === game.player1Score) {
                     draws++;
-                    points += 50;
+                    matchDraw = true;
                 } else {
                     losses++;
                 }
-                points += game.player2BonusPoints || 0;
+                // Usar pontuação atribuída no registro
+                matchPoints = game.player2BonusPoints || 0;
             }
+
+            console.log('[ScoreSystem] Jogo estudante', game.id, 'computado:', normalizedSport, 
+                '- Pontos:', matchPoints,
+                matchWon ? '(vitória)' : matchDraw ? '(empate)' : '(derrota)',
+                game.player1Id === `student_${studentId}` ? `P1 (${game.player1Score} x ${game.player2Score})` : `P2 (${game.player2Score} x ${game.player1Score})`);
+            points += matchPoints;
         });
 
+        console.log('[ScoreSystem] Total para estudante', studentId, ':', points, 'pts,', wins, 'V', draws, 'E', losses, 'D');
         return { wins, draws, losses, points, games: studentGames.length };
     }
 
@@ -316,69 +450,205 @@ class ScoreSystem {
         const tableBody = document.getElementById('tableBody');
         if (!tableBody) return;
 
+        // Carregar turmas reais do JSON de alunos
+        let alunosPorTurma = {};
+        try {
+            alunosPorTurma = JSON.parse(localStorage.getItem('studentsData')) || {};
+        } catch (e) {
+            alunosPorTurma = {};
+        }
+        // Extrai apenas turmas do 1 ao 9 ano
+        const turmasValidas = Object.keys(alunosPorTurma).filter(turma => {
+            const match = turma.match(/^(\d+)[°º]?\s*ano\s*([A-B]?)/i);
+            if (!match) return false;
+            const ano = parseInt(match[1]);
+            return ano >= 1 && ano <= 9;
+        });
+
+    // Carregar studentScores uma vez
+    const studentScores = this.loadStudentScores();
+    console.log('[ScoreSystem] updateTable() - turmas:', turmasValidas.length, 'players:', Object.keys(this.players).length, 'games:', this.games.length, 'studentScoresKeys:', Object.keys(studentScores).length);
+
         let data = [];
-
         if (this.currentView === 'salas') {
-            // Ranking das salas
-            const allClasses = new Set();
-            
-            // Adicionar salas do sistema antigo
-            Object.keys(this.scores[this.currentSport] || {}).forEach(className => {
-                allClasses.add(className);
-            });
-            
-            // Adicionar salas dos jogadores
-            Object.values(this.players).forEach(player => {
-                allClasses.add(player.class);
-            });
+            turmasValidas.forEach(turma => {
+                // Extrai ano e sala
+                const match = turma.match(/^(\d+)[°º]?\s*ano\s*([A-B]?)/i);
+                const ano = match ? match[1] : '';
+                const sala = match ? match[2] : '';
+                // Filtra por ano se necessário
+                if (this.currentYear !== 'todos' && ano !== this.currentYear) return;
+                // Pontuação do esporte (valores adicionados manualmente via admin.addScore)
+                let pontos = 0;
+                if (this.currentSport !== 'geral') {
+                    pontos = this.scores[this.currentSport]?.[turma]?.points || 0;
+                } else {
+                    Object.keys(this.scores).forEach(esporte => {
+                        pontos += this.scores[esporte]?.[turma]?.points || 0;
+                    });
+                }
 
-            allClasses.forEach(className => {
-                const classStats = this.calculateClassStats(className);
-                const oldScore = this.scores[this.currentSport]?.[className]?.points || 0;
-                
-                data.push({
-                    name: className,
-                    points: classStats.points + oldScore,
-                    wins: classStats.wins,
-                    draws: classStats.draws,
-                    losses: classStats.losses,
-                    games: classStats.games,
-                    type: 'class'
+                // Soma pontos dos alunos da turma vindos de studentScores (atribuições individuais)
+                let pontosAlunos = 0;
+                Object.keys(studentScores).forEach(studentKey => {
+                    const aluno = studentScores[studentKey];
+                    if (!aluno) return;
+                    if (aluno.turma === turma) {
+                        if (this.currentSport !== 'geral' && aluno.sports && aluno.sports[this.currentSport]) {
+                            pontosAlunos += aluno.sports[this.currentSport] || 0;
+                        } else if (this.currentSport === 'geral') {
+                            if (aluno.sports) {
+                                Object.values(aluno.sports).forEach(p => pontosAlunos += p || 0);
+                            } else if (aluno.points) {
+                                // fallback para estrutura antiga
+                                pontosAlunos += aluno.points || 0;
+                            }
+                        }
+                    }
                 });
+                pontos += pontosAlunos;
+
+                // Soma pontos dos jogos registrados (teams e players) pertencentes à turma
+                // Pontos de players (times) cadastrados
+                let pontosJogosTurma = 0;
+                console.log('[ScoreSystem] Somando pontos de jogos para turma', turma);
+
+                // Debug: listar todos os players/times
+                console.log('[ScoreSystem] Players cadastrados:', 
+                    Object.values(this.players).map(p => `${p.name} (${p.class})`));
+
+                Object.values(this.players).forEach(player => {
+                    // Normalizar className para comparação
+                    const playerClass = player.class || player.turma;
+                    console.log('[ScoreSystem] Verificando player', player.name, 'turma:', playerClass, 'contra:', turma);
+                    
+                    if (playerClass === turma) {
+                        const stats = this.calculatePlayerStats(player.id);
+                        console.log('[ScoreSystem] Player', player.name, 'da turma', turma, 'tem', stats.points, 'pontos de jogos');
+                        pontosJogosTurma += stats.points || 0;
+                    }
+                });
+
+                // Debug: listar estudantes com pontuação
+                console.log('[ScoreSystem] StudentScores:', Object.keys(studentScores).length, 'registros');
+
+                // Pontos de alunos (jogos de aluno x aluno)
+                Object.keys(studentScores).forEach(studentKey => {
+                    const aluno = studentScores[studentKey];
+                    if (!aluno) return;
+                    
+                    const sid = studentKey.replace('student_', '');
+                    const alunoTurma = aluno.turma || aluno.class;
+                    console.log('[ScoreSystem] Verificando aluno', studentKey, 'turma:', alunoTurma, 'contra:', turma);
+                    
+                    if (alunoTurma === turma) {
+                        const stats = this.calculateStudentStats(sid);
+                        console.log('[ScoreSystem] Aluno', studentKey, 'da turma', turma, 'tem', stats.points, 'pontos de jogos');
+                        pontosJogosTurma += stats.points || 0;
+                    }
+                });
+
+                console.log('[ScoreSystem] Total pontos de jogos para turma', turma, ':', pontosJogosTurma);
+                // Adiciona pontos vindos de jogos à pontuação da turma
+                pontos += pontosJogosTurma;
+                // Só mostra se houver alunos ou pontos
+                if ((alunosPorTurma[turma] && alunosPorTurma[turma].length > 0) || pontos > 0) {
+                    data.push({
+                        name: turma,
+                        points: pontos,
+                        wins: '-',
+                        draws: '-',
+                        losses: '-',
+                        games: '-',
+                        type: 'class'
+                    });
+                }
             });
         } else {
-            // Ranking dos jogadores
+            // Ranking dos jogadores/alunos individuais
+            // Carregar alunos do JSON
+            let alunosPorTurma = {};
+            try {
+                alunosPorTurma = JSON.parse(localStorage.getItem('studentsData')) || {};
+            } catch (e) {
+                alunosPorTurma = {};
+            }
+            // Extrai apenas turmas do 1 ao 9 ano
+            const turmasValidas = Object.keys(alunosPorTurma).filter(turma => {
+                const match = turma.match(/^(\d+)[°º]?\s*ano\s*([A-B]?)/i);
+                if (!match) return false;
+                const ano = parseInt(match[1]);
+                return ano >= 1 && ano <= 9;
+            });
+            // Para cada turma válida, lista alunos
+            turmasValidas.forEach(turma => {
+                const match = turma.match(/^(\d+)[°º]?\s*ano\s*([A-B]?)/i);
+                const ano = match ? match[1] : '';
+                if (this.currentYear !== 'todos' && ano !== this.currentYear) return;
+                const alunos = alunosPorTurma[turma] || [];
+                alunos.forEach(aluno => {
+                    // Pontuação do esporte
+                    let pontos = 0;
+                    const alunoScore = studentScores[`student_${aluno.id}`];
+                    if (alunoScore) {
+                        if (this.currentSport !== 'geral' && alunoScore.sports && alunoScore.sports[this.currentSport]) {
+                            pontos = alunoScore.sports[this.currentSport] || 0;
+                        } else if (this.currentSport === 'geral') {
+                            if (alunoScore.sports) {
+                                Object.values(alunoScore.sports).forEach(p => pontos += p || 0);
+                            } else if (alunoScore.points) {
+                                pontos += alunoScore.points || 0;
+                            }
+                        }
+                    }
+                    // Adiciona pontos vindos de jogos (aluno vs aluno)
+                    const statsAluno = this.calculateStudentStats(aluno.id);
+                    pontos += statsAluno.points || 0;
+                    // Só mostra se houver pontos ou registro
+                    if (pontos > 0) {
+                        data.push({
+                            name: `👤 ${aluno.nome} - ${turma}`,
+                            points: pontos,
+                            wins: '-',
+                            draws: '-',
+                            losses: '-',
+                            games: '-',
+                            type: 'player'
+                        });
+                    }
+                });
+            });
+            // Ranking dos jogadores cadastrados manualmente
             Object.values(this.players).forEach(player => {
+                const match = player.class.match(/^(\d+)[°º]?\s*ano\s*([A-B]?)/i);
+                const ano = match ? match[1] : '';
+                if (this.currentYear !== 'todos' && ano !== this.currentYear) return;
+                // Pontos vindos de atribuições manuais (scores) + pontos vindos dos jogos registrados
+                let pontos = 0;
+                if (this.currentSport !== 'geral') {
+                    pontos = this.scores[this.currentSport]?.[player.class]?.points || 0;
+                } else {
+                    Object.keys(this.scores).forEach(esporte => {
+                        pontos += this.scores[esporte]?.[player.class]?.points || 0;
+                    });
+                }
                 const stats = this.calculatePlayerStats(player.id);
+                pontos += stats.points || 0;
                 const typeIcon = player.type === 'player' ? '👤' : '🏆';
                 const numberText = player.type === 'player' && player.number ? ` (${player.number})` : '';
-                
                 data.push({
                     name: `${typeIcon} ${player.name}${numberText} - ${player.class}`,
-                    points: stats.points,
-                    wins: stats.wins,
-                    draws: stats.draws,
-                    losses: stats.losses,
-                    games: stats.games,
+                    points: pontos,
+                    wins: '-',
+                    draws: '-',
+                    losses: '-',
+                    games: '-',
                     type: 'player'
                 });
             });
         }
-
-        // Filtrar por ano se necessário
-        if (this.currentYear !== 'todos') {
-            data = data.filter(item => {
-                if (item.type === 'class') {
-                    return item.name.startsWith(this.currentYear);
-                } else {
-                    return item.name.includes(this.currentYear);
-                }
-            });
-        }
-
         // Ordenar por pontos (maior para menor)
         data.sort((a, b) => b.points - a.points);
-
         // Gerar HTML da tabela
         if (data.length === 0) {
             tableBody.innerHTML = `
@@ -390,7 +660,6 @@ class ScoreSystem {
             `;
             return;
         }
-
         tableBody.innerHTML = data.map((item, index) => {
             let positionIcon = '';
             if (index === 0) {
@@ -402,7 +671,6 @@ class ScoreSystem {
             } else {
                 positionIcon = `${index + 1}º`;
             }
-
             return `
                 <tr>
                     <td>${positionIcon}</td>

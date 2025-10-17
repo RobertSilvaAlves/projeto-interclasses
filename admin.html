@@ -8,10 +8,12 @@
     <meta name="author" content="Interclasses Unimaua">
     <meta name="theme-color" content="#ff6b35">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Admin - Interclasses Unimaua">
     <title>Administração - Interclasses Unimaua</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.new.css">
 </head>
 <body>
     <div class="container">
@@ -53,7 +55,7 @@
                         <label for="teamSportSelect">Esporte:</label>
                         <select id="teamSportSelect" required>
                             <option value="">Selecione o esporte</option>
-                            <option value="futebol">⚽ Futebol</option>
+                            <option value="futsal">⚽ Futsal</option>
                             <option value="dama">♟️ Dama</option>
                             <option value="kings-league">♔ Kings League</option>
                             <option value="pique-bandeira">🏁 Pique Bandeira</option>
@@ -66,123 +68,21 @@
 
                     <div class="form-group">
                         <label for="teamClassSelect">Sala do Time:</label>
-                        <select id="teamClassSelect" required>
-                            <option value="">Selecione a sala</option>
-                        <!-- 1º Ano -->
-                        <optgroup label="1º Ano">
-                            <option value="1A">1º Ano A</option>
-                            <option value="1B">1º Ano B</option>
-                            <option value="1C">1º Ano C</option>
-                            <option value="1D">1º Ano D</option>
-                            <option value="1E">1º Ano E</option>
-                            <option value="1F">1º Ano F</option>
-                        </optgroup>
-                        <!-- 2º Ano -->
-                        <optgroup label="2º Ano">
-                            <option value="2A">2º Ano A</option>
-                            <option value="2B">2º Ano B</option>
-                            <option value="2C">2º Ano C</option>
-                            <option value="2D">2º Ano D</option>
-                            <option value="2E">2º Ano E</option>
-                            <option value="2F">2º Ano F</option>
-                        </optgroup>
-                        <!-- 3º Ano -->
-                        <optgroup label="3º Ano">
-                            <option value="3A">3º Ano A</option>
-                            <option value="3B">3º Ano B</option>
-                            <option value="3C">3º Ano C</option>
-                            <option value="3D">3º Ano D</option>
-                            <option value="3E">3º Ano E</option>
-                            <option value="3F">3º Ano F</option>
-                        </optgroup>
-                        <!-- 4º Ano -->
-                        <optgroup label="4º Ano">
-                            <option value="4A">4º Ano A</option>
-                            <option value="4B">4º Ano B</option>
-                            <option value="4C">4º Ano C</option>
-                            <option value="4D">4º Ano D</option>
-                            <option value="4E">4º Ano E</option>
-                            <option value="4F">4º Ano F</option>
-                        </optgroup>
-                        <!-- 5º Ano -->
-                        <optgroup label="5º Ano">
-                            <option value="5A">5º Ano A</option>
-                            <option value="5B">5º Ano B</option>
-                            <option value="5C">5º Ano C</option>
-                            <option value="5D">5º Ano D</option>
-                            <option value="5E">5º Ano E</option>
-                            <option value="5F">5º Ano F</option>
-                        </optgroup>
-                        <!-- 6º Ano -->
-                        <optgroup label="6º Ano">
-                            <option value="6A">6º Ano A</option>
-                            <option value="6B">6º Ano B</option>
-                            <option value="6C">6º Ano C</option>
-                            <option value="6D">6º Ano D</option>
-                            <option value="6E">6º Ano E</option>
-                            <option value="6F">6º Ano F</option>
-                        </optgroup>
-                        <!-- 7º Ano -->
-                        <optgroup label="7º Ano">
-                            <option value="7A">7º Ano A</option>
-                            <option value="7B">7º Ano B</option>
-                            <option value="7C">7º Ano C</option>
-                            <option value="7D">7º Ano D</option>
-                            <option value="7E">7º Ano E</option>
-                            <option value="7F">7º Ano F</option>
-                        </optgroup>
-                        <!-- 8º Ano -->
-                        <optgroup label="8º Ano">
-                            <option value="8A">8º Ano A</option>
-                            <option value="8B">8º Ano B</option>
-                            <option value="8C">8º Ano C</option>
-                            <option value="8D">8º Ano D</option>
-                            <option value="8E">8º Ano E</option>
-                            <option value="8F">8º Ano F</option>
-                        </optgroup>
-                        <!-- 9º Ano -->
-                        <optgroup label="9º Ano">
-                            <option value="9A">9º Ano A</option>
-                            <option value="9B">9º Ano B</option>
-                            <option value="9C">9º Ano C</option>
-                            <option value="9D">9º Ano D</option>
-                            <option value="9E">9º Ano E</option>
-                            <option value="9F">9º Ano F</option>
-                        </optgroup>
-                        <!-- 1º Ano Médio -->
-                        <optgroup label="1º Ano Médio">
-                            <option value="1MA">1º Ano Médio A</option>
-                            <option value="1MB">1º Ano Médio B</option>
-                            <option value="1MC">1º Ano Médio C</option>
-                            <option value="1MD">1º Ano Médio D</option>
-                            <option value="1ME">1º Ano Médio E</option>
-                            <option value="1MF">1º Ano Médio F</option>
-                        </optgroup>
-                        <!-- 2º Ano Médio -->
-                        <optgroup label="2º Ano Médio">
-                            <option value="2MA">2º Ano Médio A</option>
-                            <option value="2MB">2º Ano Médio B</option>
-                            <option value="2MC">2º Ano Médio C</option>
-                            <option value="2MD">2º Ano Médio D</option>
-                            <option value="2ME">2º Ano Médio E</option>
-                            <option value="2MF">2º Ano Médio F</option>
-                        </optgroup>
-                        <!-- 3º Ano Médio -->
-                        <optgroup label="3º Ano Médio">
-                            <option value="3MA">3º Ano Médio A</option>
-                            <option value="3MB">3º Ano Médio B</option>
-                            <option value="3MC">3º Ano Médio C</option>
-                            <option value="3MD">3º Ano Médio D</option>
-                            <option value="3ME">3º Ano Médio E</option>
-                            <option value="3MF">3º Ano Médio F</option>
-                        </optgroup>
-                    </select>
-                </div>
+                        <div id="teamClassSelectContainer"></div>
+                    </div>
 
                     <div class="form-group">
                         <label for="teamName">Nome do Time:</label>
                         <input type="text" id="teamName" placeholder="Nome do time" maxlength="50" required>
                         <small>Ex: Time A, Time B, etc.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <h4>🏃‍♂️ Alunos do Time</h4>
+                        <div id="teamStudentsSelect" class="team-students-select">
+                            <!-- Será preenchido via JavaScript -->
+                            <p><small class="selecione_turma_texto">Selecione a turma primeiro para ver os alunos disponíveis</small></p>
+                        </div>
                     </div>
                 </div>
 
@@ -190,21 +90,7 @@
                 <div id="studentRegistrationFields" style="display: none;">
                     <div class="form-group">
                         <label for="studentClassSelect">Sala do Aluno:</label>
-                        <select id="studentClassSelect" required>
-                            <option value="">Selecione a sala</option>
-                            <option value="1° ano A">1º Ano A</option>
-                            <option value="1° ano B">1º Ano B</option>
-                            <option value="2° ano A">2º Ano A</option>
-                            <option value="2° ano B">2º Ano B</option>
-                            <option value="3° ano A">3º Ano A</option>
-                            <option value="3º ano B">3º Ano B</option>
-                            <option value="4° ano A">4º Ano A</option>
-                            <option value="5º Ano A">5º Ano A</option>
-                            <option value="6º Ano A">6º Ano A</option>
-                            <option value="7º Ano A">7º Ano A</option>
-                            <option value="8º Ano A">8º Ano A</option>
-                            <option value="9º Ano A">9º Ano A</option>
-                        </select>
+                        <div id="studentClassSelectContainer"></div>
                     </div>
 
                     <div class="form-group">
@@ -217,8 +103,8 @@
                 <button onclick="addRegistration()" class="btn-primary">➕ Cadastrar</button>
             </div>
 
-            <!-- Gerenciamento de Alunos -->
-            <div class="admin-section">
+            <!-- Gerenciamento de Alunos (Desabilitado) -->
+            <div class="admin-section" style="display: none;">
                 <h2>👥 Gerenciar Alunos</h2>
                 
                 <div class="form-group">
@@ -298,7 +184,7 @@
                     <label for="gameSportSelect">Esporte:</label>
                     <select id="gameSportSelect" required>
                         <option value="">Selecione o esporte</option>
-                        <option value="futebol">⚽ Futebol</option>
+                        <option value="futsal">⚽ Futsal</option>
                         <option value="dama">♟️ Dama</option>
                         <option value="kings-league">♔ Kings League</option>
                         <option value="pique-bandeira">🏁 Pique Bandeira</option>
@@ -386,25 +272,27 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="player1Score">Placar Jogador 1:</label>
-                    <input type="number" id="player1Score" placeholder="100 = Vitória, 50 = Empate, 0 = Derrota" min="0" max="999" value="0" required>
+                    <label for="player1Score">Placar Jogador/Time 1:</label>
+                    <input type="number" id="player1Score" placeholder="Ex: 3 (gols, pontos etc)" min="0" max="999" value="0" required>
+                    <small>Quantidade de gols, pontos, etc.</small>
                 </div>
 
                 <div class="form-group">
-                    <label for="player2Score">Placar Jogador 2:</label>
-                    <input type="number" id="player2Score" placeholder="100 = Vitória, 50 = Empate, 0 = Derrota" min="0" max="999" value="0" required>
+                    <label for="player2Score">Placar Jogador/Time 2:</label>
+                    <input type="number" id="player2Score" placeholder="Ex: 2 (gols, pontos etc)" min="0" max="999" value="0" required>
+                    <small>Quantidade de gols, pontos, etc.</small>
                 </div>
 
                 <div class="form-group">
-                    <label for="player1BonusPoints">Pontos Extras Jogador 1:</label>
-                    <input type="number" id="player1BonusPoints" placeholder="0" min="0" max="10000" value="0">
-                    <small>Pontos extras para o jogador/time 1</small>
+                    <label for="player1BonusPoints">Pontuação para o Time/Jogador 1:</label>
+                    <input type="number" id="player1BonusPoints" placeholder="Ex: 1000" min="0" max="10000" value="0">
+                    <small>Pontos que serão atribuídos ao jogador/time 1</small>
                 </div>
 
                 <div class="form-group">
-                    <label for="player2BonusPoints">Pontos Extras Jogador 2:</label>
-                    <input type="number" id="player2BonusPoints" placeholder="0" min="0" max="10000" value="0">
-                    <small>Pontos extras para o jogador/time 2</small>
+                    <label for="player2BonusPoints">Pontuação para o Time/Jogador 2:</label>
+                    <input type="number" id="player2BonusPoints" placeholder="Ex: 800" min="0" max="10000" value="0">
+                    <small>Pontos que serão atribuídos ao jogador/time 2</small>
                 </div>
 
                 <button onclick="registerGame()" class="btn-primary">⚽ Registrar Jogo</button>
@@ -414,6 +302,15 @@
             <div class="admin-section">
                 <h2>📊 Adicionar Pontuação</h2>
                 
+                <div class="form-group">
+                    <label for="pontuacaoTipo">Tipo de Atribuição:</label>
+                    <select id="pontuacaoTipo" onchange="togglePontuacaoFields()" required>
+                        <option value="">Selecione o tipo de atribuição</option>
+                        <option value="turma">🏫 Pontuação por Turma</option>
+                        <option value="individual">👤 Pontuação Individual</option>
+                    </select>
+                </div>
+
                 <div class="form-group">
                     <label for="sportSelect">Tipo de Pontuação:</label>
                     <select id="sportSelect" required>
@@ -426,125 +323,68 @@
                         <option value="basquete">🏀 Basquete</option>
                         <option value="futvolei">🏐 Futvôlei</option>
                         <option value="handbol">🤾‍♂️ Handbol</option>
+                        <option value="queimada">🔥 Queimada</option>
+                        <option value="confeccao-bandeira">🎨 Confecção de Bandeira</option>
                         <option value="prova-nacional">🏆 Prova Nacional</option>
                         <option value="organizacao">📋 Organização</option>
                         <option value="destaque-turma">⭐ Destaque da Turma</option>
                     </select>
                 </div>
 
-                <div class="form-group">
-                    <label for="classSelect">Turma:</label>
-                    <select id="classSelect" required>
-                        <option value="">Selecione a turma</option>
-                        <!-- 1º Ano -->
-                        <optgroup label="1º Ano">
-                            <option value="1A">1º Ano A</option>
-                            <option value="1B">1º Ano B</option>
-                            <option value="1C">1º Ano C</option>
-                            <option value="1D">1º Ano D</option>
-                            <option value="1E">1º Ano E</option>
-                            <option value="1F">1º Ano F</option>
-                        </optgroup>
-                        <!-- 2º Ano -->
-                        <optgroup label="2º Ano">
-                            <option value="2A">2º Ano A</option>
-                            <option value="2B">2º Ano B</option>
-                            <option value="2C">2º Ano C</option>
-                            <option value="2D">2º Ano D</option>
-                            <option value="2E">2º Ano E</option>
-                            <option value="2F">2º Ano F</option>
-                        </optgroup>
-                        <!-- 3º Ano -->
-                        <optgroup label="3º Ano">
-                            <option value="3A">3º Ano A</option>
-                            <option value="3B">3º Ano B</option>
-                            <option value="3C">3º Ano C</option>
-                            <option value="3D">3º Ano D</option>
-                            <option value="3E">3º Ano E</option>
-                            <option value="3F">3º Ano F</option>
-                        </optgroup>
-                        <!-- 4º Ano -->
-                        <optgroup label="4º Ano">
-                            <option value="4A">4º Ano A</option>
-                            <option value="4B">4º Ano B</option>
-                            <option value="4C">4º Ano C</option>
-                            <option value="4D">4º Ano D</option>
-                            <option value="4E">4º Ano E</option>
-                            <option value="4F">4º Ano F</option>
-                        </optgroup>
-                        <!-- 5º Ano -->
-                        <optgroup label="5º Ano">
-                            <option value="5A">5º Ano A</option>
-                            <option value="5B">5º Ano B</option>
-                            <option value="5C">5º Ano C</option>
-                            <option value="5D">5º Ano D</option>
-                            <option value="5E">5º Ano E</option>
-                            <option value="5F">5º Ano F</option>
-                        </optgroup>
-                        <!-- 6º Ano -->
-                        <optgroup label="6º Ano">
-                            <option value="6A">6º Ano A</option>
-                            <option value="6B">6º Ano B</option>
-                            <option value="6C">6º Ano C</option>
-                            <option value="6D">6º Ano D</option>
-                            <option value="6E">6º Ano E</option>
-                            <option value="6F">6º Ano F</option>
-                        </optgroup>
-                        <!-- 7º Ano -->
-                        <optgroup label="7º Ano">
-                            <option value="7A">7º Ano A</option>
-                            <option value="7B">7º Ano B</option>
-                            <option value="7C">7º Ano C</option>
-                            <option value="7D">7º Ano D</option>
-                            <option value="7E">7º Ano E</option>
-                            <option value="7F">7º Ano F</option>
-                        </optgroup>
-                        <!-- 8º Ano -->
-                        <optgroup label="8º Ano">
-                            <option value="8A">8º Ano A</option>
-                            <option value="8B">8º Ano B</option>
-                            <option value="8C">8º Ano C</option>
-                            <option value="8D">8º Ano D</option>
-                            <option value="8E">8º Ano E</option>
-                            <option value="8F">8º Ano F</option>
-                        </optgroup>
-                        <!-- 9º Ano -->
-                        <optgroup label="9º Ano">
-                            <option value="9A">9º Ano A</option>
-                            <option value="9B">9º Ano B</option>
-                            <option value="9C">9º Ano C</option>
-                            <option value="9D">9º Ano D</option>
-                            <option value="9E">9º Ano E</option>
-                            <option value="9F">9º Ano F</option>
-                        </optgroup>
-                        <!-- 1º Ano Médio -->
-                        <optgroup label="1º Ano Médio">
-                            <option value="1MA">1º Ano Médio A</option>
-                            <option value="1MB">1º Ano Médio B</option>
-                            <option value="1MC">1º Ano Médio C</option>
-                            <option value="1MD">1º Ano Médio D</option>
-                            <option value="1ME">1º Ano Médio E</option>
-                            <option value="1MF">1º Ano Médio F</option>
-                        </optgroup>
-                        <!-- 2º Ano Médio -->
-                        <optgroup label="2º Ano Médio">
-                            <option value="2MA">2º Ano Médio A</option>
-                            <option value="2MB">2º Ano Médio B</option>
-                            <option value="2MC">2º Ano Médio C</option>
-                            <option value="2MD">2º Ano Médio D</option>
-                            <option value="2ME">2º Ano Médio E</option>
-                            <option value="2MF">2º Ano Médio F</option>
-                        </optgroup>
-                        <!-- 3º Ano Médio -->
-                        <optgroup label="3º Ano Médio">
-                            <option value="3MA">3º Ano Médio A</option>
-                            <option value="3MB">3º Ano Médio B</option>
-                            <option value="3MC">3º Ano Médio C</option>
-                            <option value="3MD">3º Ano Médio D</option>
-                            <option value="3ME">3º Ano Médio E</option>
-                            <option value="3MF">3º Ano Médio F</option>
-                        </optgroup>
-                    </select>
+                <!-- Campos para pontuação por turma -->
+                <div id="pontuacaoTurmaFields">
+                    <div class="form-group">
+                        <label for="classSelect">Turma:</label>
+                        <div id="pontuacaoClassSelectContainer"></div>
+                    </div>
+                </div>
+
+                <!-- Campos para pontuação individual -->
+                <div id="pontuacaoIndividualFields" style="display: none;">
+                    <div class="form-group">
+                        <label for="individualClassSelect">Turma do Aluno:</label>
+                        <select id="individualClassSelect" onchange="loadStudentsForPontuacao()" required>
+                            <option value="">Selecione a turma</option>
+                            <optgroup label="1º Ano">
+                                <option value="1° ano A">1º Ano A</option>
+                                <option value="1° ano B">1º Ano B</option>
+                            </optgroup>
+                            <optgroup label="2º Ano">
+                                <option value="2° ano A">2º Ano A</option>
+                                <option value="2° ano B">2º Ano B</option>
+                            </optgroup>
+                            <optgroup label="3º Ano">
+                                <option value="3° ano A">3º Ano A</option>
+                                <option value="3º ano B">3º Ano B</option>
+                            </optgroup>
+                            <optgroup label="4º Ano">
+                                <option value="4° ano A">4º Ano A</option>
+                            </optgroup>
+                            <optgroup label="5º Ano">
+                                <option value="5º Ano A">5º Ano A</option>
+                            </optgroup>
+                            <optgroup label="6º Ano">
+                                <option value="6º Ano A">6º Ano A</option>
+                            </optgroup>
+                            <optgroup label="7º Ano">
+                                <option value="7º Ano A">7º Ano A</option>
+                            </optgroup>
+                            <optgroup label="8º Ano">
+                                <option value="8º Ano A">8º Ano A</option>
+                            </optgroup>
+                            <optgroup label="9º Ano">
+                                <option value="9º Ano A">9º Ano A</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="studentSelect">Aluno:</label>
+                        <select id="studentSelect" required>
+                            <option value="">Selecione o aluno</option>
+                            <!-- Será preenchido via JavaScript -->
+                        </select>
+                    </div>
                 </div>
 
                 <div class="form-group">

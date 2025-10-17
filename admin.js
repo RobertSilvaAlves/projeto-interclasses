@@ -10,22 +10,44 @@ class AdminSystem {
     }
 
     async initializeStudentsData() {
-        await this.loadStudentsData();
+        try {
+            await this.loadStudentsData();
+            console.log('✅ Dados dos alunos carregados com sucesso');
+            this.showNotification('✅ Dados dos alunos carregados com sucesso!', 'success');
+        } catch (error) {
+            console.error('❌ Erro ao carregar dados dos alunos:', error);
+            this.showNotification('❌ Erro ao carregar dados dos alunos. Tente recarregar a página.', 'error');
+        }
     }
 
     setupEventListeners() {
         // Event listener para tecla Enter no campo de senha
-        document.getElementById('passwordInput').addEventListener('keypress', (e) => {
+        document.getElementById('passwordInput')?.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 this.checkPassword();
             }
         });
 
         // Event listener para tecla Enter no campo de nova senha
-        document.getElementById('newPassword').addEventListener('keypress', (e) => {
+        document.getElementById('newPassword')?.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 this.changePassword();
             }
+        });
+
+        // Event listener para o select de tipo de pontuação
+        document.getElementById('pontuacaoTipo')?.addEventListener('change', () => {
+            this.togglePontuacaoFields();
+        });
+
+        // Event listener para o select de turma na pontuação individual
+        document.getElementById('individualClassSelect')?.addEventListener('change', () => {
+            this.loadStudentsForPontuacao();
+        });
+
+        // Event listener para o select de turma no cadastro de time
+        document.getElementById('teamClassSelect')?.addEventListener('change', () => {
+            this.loadTeamStudents();
         });
     }
 
@@ -144,6 +166,9 @@ class AdminSystem {
         document.getElementById('player2BonusPoints').value = '0';
         document.getElementById('studentClassSelect').value = '';
         document.getElementById('studentPoints').value = '0';
+        document.getElementById('pontuacaoTipo').value = '';
+        document.getElementById('individualClassSelect').value = '';
+        document.getElementById('studentSelect').value = '';
         
         // Esconder todos os campos específicos
         document.getElementById('teamRegistrationFields').style.display = 'none';
@@ -151,6 +176,8 @@ class AdminSystem {
         document.getElementById('teamFields').style.display = 'none';
         document.getElementById('studentFields').style.display = 'none';
         document.getElementById('studentsList').style.display = 'none';
+        document.getElementById('pontuacaoTurmaFields').style.display = 'none';
+        document.getElementById('pontuacaoIndividualFields').style.display = 'none';
     }
 
     // Função para alternar campos baseado no tipo selecionado
@@ -217,21 +244,56 @@ class AdminSystem {
     // ===== NOVAS FUNCIONALIDADES =====
 
     async loadStudentsData() {
+        if (this.studentsData) {
+            // Se já temos os dados carregados, retorna
+            return this.studentsData;
+        }
+
         try {
-            // Carregar dados dos alunos do arquivo JSON
+            // Primeiro tenta carregar do localStorage (cache)
+            const cachedData = localStorage.getItem('studentsData');
+            if (cachedData) {
+                this.studentsData = JSON.parse(cachedData);
+                console.log('Dados dos alunos carregados do cache:', this.studentsData);
+                return this.studentsData;
+            }
+
+            // Se não tem cache, carrega do arquivo
             const response = await fetch('assets/alunos_por_turma.json');
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
+
             const data = await response.json();
+            if (!data || Object.keys(data).length === 0) {
+                throw new Error('Arquivo JSON vazio ou inválido');
+            }
+
+            // Valida a estrutura dos dados
+            for (const [turma, alunos] of Object.entries(data)) {
+                if (!Array.isArray(alunos)) {
+                    throw new Error(`Dados inválidos para turma ${turma}`);
+                }
+                for (const aluno of alunos) {
+                    if (!aluno.id || !aluno.nome) {
+                        throw new Error(`Aluno inválido na turma ${turma}`);
+                    }
+                }
+            }
+
             this.studentsData = data;
-            console.log('Dados dos alunos carregados:', data);
-            this.showNotification('✅ Dados dos alunos carregados com sucesso!', 'success');
+            // Salva no cache
+            localStorage.setItem('studentsData', JSON.stringify(data));
+            
+            console.log('Dados dos alunos carregados do arquivo:', data);
+            console.log('Turmas disponíveis:', Object.keys(data));
+            return this.studentsData;
+
         } catch (error) {
             console.error('Erro ao carregar dados dos alunos:', error);
-            this.showNotification('❌ Erro ao carregar dados dos alunos! Verifique se o arquivo existe.', 'error');
-            // Tentar carregar dados de fallback ou mostrar instruções
-            this.showNotification('💡 Certifique-se de que o arquivo assets/alunos_por_turma.json existe e está acessível.', 'info');
+            this.showNotification('❌ Erro ao carregar dados dos alunos! ' + error.message, 'error');
+            this.showNotification('💡 Verifique se o arquivo assets/alunos_por_turma.json existe e está acessível.', 'info');
+            throw error;
         }
     }
 
@@ -276,6 +338,15 @@ class AdminSystem {
     saveGames(games) {
         localStorage.setItem('games', JSON.stringify(games));
         this.updateLastUpdate();
+        // Emitir evento genérico para notificar outras abas/janelas
+        try {
+            const payload = JSON.stringify({ type: 'games_updated', ts: Date.now() });
+            localStorage.setItem('__app_event', payload);
+            localStorage.removeItem('__app_event');
+            console.log('[Admin] Evento __app_event (games_updated) emitido');
+        } catch (e) {
+            console.warn('[Admin] Falha ao emitir __app_event', e);
+        }
     }
 
     updateLastUpdate() {
@@ -301,6 +372,34 @@ class AdminSystem {
     }
 
     // Cadastrar apenas times
+    loadTeamStudents() {
+        const className = document.getElementById('teamClassSelect').value;
+        const studentsContainer = document.getElementById('teamStudentsSelect');
+
+        if (!className) {
+            studentsContainer.innerHTML = '<p><small>Selecione a turma primeiro para ver os alunos disponíveis</small></p>';
+            return;
+        }
+
+        if (!this.studentsData || !this.studentsData[className]) {
+            studentsContainer.innerHTML = '<p><small>⚠️ Nenhum aluno encontrado nesta turma</small></p>';
+            return;
+        }
+
+        const students = this.studentsData[className];
+        studentsContainer.innerHTML = `
+            <div class="team-students-list">
+                ${students.map(student => `
+                    <div class="team-student-item">
+                        <input type="checkbox" id="student_${student.id}" data-student-id="${student.id}" data-student-name="${student.nome}">
+                        <label for="student_${student.id}">👤 ${student.nome}</label>
+                    </div>
+                `).join('')}
+            </div>
+            <small class="selecione_alunos_time_texto">✅ Selecione os alunos que fazem parte do time</small>
+        `;
+    }
+
     addTeam() {
         const sport = document.getElementById('teamSportSelect').value;
         const className = document.getElementById('teamClassSelect').value;
@@ -308,6 +407,18 @@ class AdminSystem {
 
         if (!sport || !className || !name) {
             this.showNotification('❌ Preencha todos os campos obrigatórios!', 'error');
+            return;
+        }
+
+        // Pegar alunos selecionados
+        const selectedStudents = Array.from(document.querySelectorAll('#teamStudentsSelect input[type="checkbox"]:checked'))
+            .map(checkbox => ({
+                id: checkbox.dataset.studentId,
+                name: checkbox.dataset.studentName
+            }));
+
+        if (selectedStudents.length === 0) {
+            this.showNotification('❌ Selecione pelo menos um aluno para o time!', 'error');
             return;
         }
 
@@ -333,15 +444,17 @@ class AdminSystem {
             name: name,
             class: className,
             type: 'team',
-            sport: sport
+            sport: sport,
+            students: selectedStudents
         };
 
         this.savePlayers(players);
         this.updatePlayerSelects();
         this.clearTeamForm();
         
-        this.showNotification(`✅ Time ${name} cadastrado com sucesso!`, 'success');
-        this.addToHistory(`🏆 Time cadastrado: ${name} - ${className}`);
+        const studentNames = selectedStudents.map(s => s.name).join(', ');
+        this.showNotification(`✅ Time ${name} cadastrado com sucesso com os alunos: ${studentNames}`, 'success');
+        this.addToHistory(`🏆 Time cadastrado: ${name} - ${className} (${selectedStudents.length} alunos)`);
 
         // Atualizar página principal se estiver aberta
         if (window.opener && window.opener.scoreSystem) {
@@ -376,7 +489,6 @@ class AdminSystem {
             const existingStudent = this.studentsData[className].find(student => 
                 student.nome.toLowerCase() === name.toLowerCase()
             );
-            
             if (existingStudent) {
                 this.showNotification(`❌ Aluno "${name}" já está cadastrado na turma ${className}!`, 'error');
                 return;
@@ -391,18 +503,22 @@ class AdminSystem {
         if (!this.studentsData[className]) {
             this.studentsData[className] = [];
         }
-
-        this.studentsData[className].push({
-            id: newId,
-            nome: name
-        });
+        this.studentsData[className].push({ id: newId, nome: name });
 
         // Salvar dados atualizados
+        localStorage.setItem('studentsData', JSON.stringify(this.studentsData));
         this.saveStudentsData();
 
         this.clearStudentForm();
         this.showNotification(`✅ Aluno "${name}" cadastrado com sucesso na turma ${className}!`, 'success');
         this.addToHistory(`👤 Aluno cadastrado: ${name} - ${className}`);
+
+        // Atualizar selects dinâmicos e listas de alunos
+        this.createDynamicClassSelects();
+        // Atualizar selects de alunos em pontuação individual, registro de jogo, etc
+        this.loadStudentsForPontuacao();
+        this.loadStudentsForPlayer1();
+        this.loadStudentsForPlayer2();
 
         // Atualizar página principal se estiver aberta
         if (window.opener && window.opener.scoreSystem) {
@@ -442,6 +558,11 @@ class AdminSystem {
 
         if (registrationType === 'team') {
             teamFields.style.display = 'block';
+            // Carregar alunos se uma turma já estiver selecionada
+            const selectedClass = document.getElementById('teamClassSelect').value;
+            if (selectedClass) {
+                this.loadTeamStudents();
+            }
         } else if (registrationType === 'student') {
             studentFields.style.display = 'block';
         }
@@ -542,8 +663,21 @@ class AdminSystem {
     }
 
     saveStudentScores(scores) {
+        // Salva scores dos alunos e garante notificação para outras abas/janelas
         localStorage.setItem('studentScores', JSON.stringify(scores));
         this.updateLastUpdate();
+
+        // Forçar evento de storage para outras abas: escreve uma chave temporária e remove
+        try {
+            localStorage.setItem('__students_update_ts', Date.now().toString());
+            localStorage.removeItem('__students_update_ts');
+            // Emitir evento genérico também
+            const payload = JSON.stringify({ type: 'studentScores_updated', ts: Date.now() });
+            localStorage.setItem('__app_event', payload);
+            localStorage.removeItem('__app_event');
+        } catch (e) {
+            console.warn('Não foi possível disparar evento de storage temporário:', e);
+        }
     }
 
     // Função para alternar campos de jogo
@@ -633,7 +767,7 @@ class AdminSystem {
             return;
         }
 
-        let player1Id, player2Id, player1Name, player2Name;
+        let player1Id, player2Id, player1Name, player2Name, player1Class, player2Class;
 
         if (gameType === 'team') {
             player1Id = document.getElementById('player1Select').value;
@@ -655,6 +789,43 @@ class AdminSystem {
 
             player1Name = player1.name;
             player2Name = player2.name;
+            player1Class = player1.class;
+            player2Class = player2.class;
+
+            // Somar pontos à turma do time
+            if (player1BonusPoints > 0) {
+                this.addScoreToClass(sport, player1Class, player1BonusPoints);
+            }
+            if (player2BonusPoints > 0) {
+                this.addScoreToClass(sport, player2Class, player2BonusPoints);
+            }
+
+            // Se o time tem alunos cadastrados, distribuir os pontos entre eles
+            if (player1.students && player1.students.length > 0 && player1BonusPoints > 0) {
+                const pointsPerStudent = Math.floor(player1BonusPoints / player1.students.length);
+                player1.students.forEach(student => {
+                    const studentKey = `student_${student.id}`;
+                    const studentScores = this.loadStudentScores();
+                    if (!studentScores[studentKey]) {
+                        studentScores[studentKey] = { points: 0, turma: player1Class };
+                    }
+                    studentScores[studentKey].points += pointsPerStudent;
+                    this.saveStudentScores(studentScores);
+                });
+            }
+
+            if (player2.students && player2.students.length > 0 && player2BonusPoints > 0) {
+                const pointsPerStudent = Math.floor(player2BonusPoints / player2.students.length);
+                player2.students.forEach(student => {
+                    const studentKey = `student_${student.id}`;
+                    const studentScores = this.loadStudentScores();
+                    if (!studentScores[studentKey]) {
+                        studentScores[studentKey] = { points: 0, turma: player2Class };
+                    }
+                    studentScores[studentKey].points += pointsPerStudent;
+                    this.saveStudentScores(studentScores);
+                });
+            }
         } else if (gameType === 'student') {
             const student1Id = document.getElementById('student1Select').value;
             const student2Id = document.getElementById('student2Select').value;
@@ -668,17 +839,17 @@ class AdminSystem {
             player1Id = `student_${student1Id}`;
             player2Id = `student_${student2Id}`;
 
-            // Buscar nomes dos alunos
-            const student1Class = document.getElementById('student1ClassSelect').value;
-            const student2Class = document.getElementById('student2ClassSelect').value;
+            // Buscar nomes dos alunos e classes
+            player1Class = document.getElementById('student1ClassSelect').value;
+            player2Class = document.getElementById('student2ClassSelect').value;
             
-            if (!this.studentsData || !this.studentsData[student1Class] || !this.studentsData[student2Class]) {
+            if (!this.studentsData || !this.studentsData[player1Class] || !this.studentsData[player2Class]) {
                 this.showNotification('❌ Dados dos alunos não encontrados!', 'error');
                 return;
             }
 
-            const student1 = this.studentsData[student1Class].find(s => s.id == student1Id);
-            const student2 = this.studentsData[student2Class].find(s => s.id == student2Id);
+            const student1 = this.studentsData[player1Class].find(s => s.id == student1Id);
+            const student2 = this.studentsData[player2Class].find(s => s.id == student2Id);
             
             if (!student1 || !student2) {
                 this.showNotification('❌ Aluno não encontrado!', 'error');
@@ -687,6 +858,14 @@ class AdminSystem {
 
             player1Name = student1.nome;
             player2Name = student2.nome;
+
+            // Somar pontos à turma dos alunos
+            if (player1BonusPoints > 0) {
+                this.addScoreToClass(sport, player1Class, player1BonusPoints);
+            }
+            if (player2BonusPoints > 0) {
+                this.addScoreToClass(sport, player2Class, player2BonusPoints);
+            }
         }
 
         if (player1Id === player2Id) {
@@ -760,15 +939,214 @@ class AdminSystem {
         document.getElementById('studentFields').style.display = 'none';
     }
 
-    // ===== SISTEMA ANTIGO (MANTIDO PARA COMPATIBILIDADE) =====
+    // Sistema de Pontuação (Atualizado)
+    togglePontuacaoFields() {
+        const tipo = document.getElementById('pontuacaoTipo').value;
+        const turmaFields = document.getElementById('pontuacaoTurmaFields');
+        const individualFields = document.getElementById('pontuacaoIndividualFields');
+
+        // Esconder todos os campos primeiro
+        turmaFields.style.display = 'none';
+        individualFields.style.display = 'none';
+
+        if (tipo === '') return;
+
+        if (!this.studentsData) {
+            // Se os dados ainda não foram carregados, carrega primeiro
+            this.loadStudentsData().then(() => {
+                this.setupPontuacaoFields(tipo, turmaFields, individualFields);
+            });
+        } else {
+            this.setupPontuacaoFields(tipo, turmaFields, individualFields);
+        }
+    }
+
+    setupPontuacaoFields(tipo, turmaFields, individualFields) {
+        if (tipo === 'turma') {
+            turmaFields.style.display = 'block';
+            individualFields.style.display = 'none';
+        } else if (tipo === 'individual') {
+            turmaFields.style.display = 'none';
+            individualFields.style.display = 'block';
+            
+            // Copiar opções de turmas para o select individual
+            const classSelect = document.getElementById('classSelect');
+            const individualClassSelect = document.getElementById('individualClassSelect');
+            
+            if (classSelect && individualClassSelect) {
+                individualClassSelect.innerHTML = '<option value="">Selecione a turma</option>';
+                
+                // Copiar cada optgroup e suas opções, ajustando os valores para corresponder ao formato do JSON
+                Array.from(classSelect.getElementsByTagName('optgroup')).forEach(group => {
+                    const newGroup = document.createElement('optgroup');
+                    newGroup.label = group.label;
+                    Array.from(group.getElementsByTagName('option')).forEach(option => {
+                        const newOption = document.createElement('option');
+                        const normalizedClass = this.normalizeClassName(option.value); // Usa o valor normalizado
+                        newOption.value = option.value; // Mantém o valor original para compatibilidade
+                        newOption.setAttribute('data-normalized', normalizedClass); // Armazena o valor normalizado
+                        newOption.text = option.text;
+                        newGroup.appendChild(newOption);
+                    });
+                    individualClassSelect.appendChild(newGroup);
+                });
+            }
+        }
+    }
+
+    async loadStudentsForPontuacao() {
+        const individualClassSelect = document.getElementById('individualClassSelect');
+        const selectedClass = individualClassSelect.value;
+        const studentSelect = document.getElementById('studentSelect');
+
+        if (!selectedClass) {
+            studentSelect.innerHTML = '<option value="">Selecione o aluno</option>';
+            return;
+        }
+
+        // Se os dados dos alunos ainda não foram carregados, carrega primeiro
+        if (!this.studentsData) {
+            await this.loadStudentsData();
+        }
+
+        // Buscar o valor normalizado no elemento selecionado
+        const selectedOption = individualClassSelect.querySelector(`option[value="${selectedClass}"]`);
+        const normalizedClass = selectedOption?.getAttribute('data-normalized') || this.normalizeClassName(selectedClass);
+
+        console.log('Turma selecionada:', selectedClass);
+        console.log('Turma normalizada:', normalizedClass);
+        console.log('Turmas disponíveis:', Object.keys(this.studentsData));
+        
+        // Tentar diferentes formatos da turma
+        const possibleFormats = [
+            normalizedClass,
+            `${selectedClass.charAt(0)}° ano ${selectedClass.charAt(1)}`,
+            `${selectedClass.charAt(0)}º ano ${selectedClass.charAt(1)}`,
+            selectedClass
+        ];
+
+        let foundClass = null;
+        for (const format of possibleFormats) {
+            if (this.studentsData[format]) {
+                foundClass = format;
+                break;
+            }
+        }
+
+        if (!this.studentsData || !foundClass) {
+            this.showNotification(`❌ Dados dos alunos não encontrados para a turma ${selectedClass}!`, 'error');
+            studentSelect.innerHTML = '<option value="">Turma não encontrada</option>';
+            console.error('Turma não encontrada nos dados. Formatos tentados:', possibleFormats);
+            return;
+        }
+
+        const students = this.studentsData[foundClass];
+        console.log(`Alunos encontrados para ${foundClass}:`, students);
+
+        const studentOptions = students.map(student => 
+            `<option value="${student.id}">${student.nome}</option>`
+        ).join('');
+
+        studentSelect.innerHTML = '<option value="">Selecione o aluno</option>' + studentOptions;
+        this.showNotification(`✅ ${students.length} alunos carregados para ${selectedClass}`, 'success');
+    }
+
+    normalizeClassName(className) {
+        // Converter formato "3B" para "3º ano B"
+        if (!className) return '';
+
+        // Se já estiver no formato completo, retorna como está
+        if (className.includes('ano')) return className;
+
+        let normalized = className;
+
+        // Tratar turmas do ensino médio (ex: 1MB -> 1º Ano Médio B)
+        if (className.includes('M')) {
+            const number = className.charAt(0);
+            const letter = className.charAt(2);
+            return [
+                `${number}º Ano Médio ${letter}`,
+                `${number}° Ano Médio ${letter}`,
+                `${number}º ano Médio ${letter}`,
+                `${number}° ano Médio ${letter}`
+            ][0]; // Retorna o primeiro formato
+        }
+
+        // Tratar turmas regulares (ex: 3B -> 3º ano B)
+        const number = className.charAt(0);
+        const letter = className.charAt(1);
+        return [
+            `${number}° ano ${letter}`,
+            `${number}º ano ${letter}`,
+            `${number}° Ano ${letter}`,
+            `${number}º Ano ${letter}`
+        ][0]; // Retorna o primeiro formato
+    }
+
+    async loadStudentsFromJSON() {
+        try {
+            // Primeiro tenta carregar do cache
+            const cachedData = localStorage.getItem('studentsData');
+            if (cachedData) {
+                return JSON.parse(cachedData);
+            }
+
+            // Se não tem cache, carrega do arquivo
+            const response = await fetch('assets/alunos_por_turma.json');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            // Salva no cache
+            localStorage.setItem('studentsData', JSON.stringify(data));
+            return data;
+        } catch (error) {
+            console.error('Erro ao carregar dados dos alunos:', error);
+            this.showNotification('❌ Erro ao carregar dados dos alunos!', 'error');
+            return {};
+        }
+    }
+
+    async loadStudentsForPontuacao() {
+        const pontuacaoTipo = document.getElementById('pontuacaoTipo').value;
+        const studentSelect = document.getElementById('studentSelect');
+
+        studentSelect.innerHTML = '<option value="">Selecione o aluno</option>';
+
+        const selectedClass = document.getElementById('individualClassSelect').value;
+        
+        if (!selectedClass) {
+            this.showNotification('❌ Selecione uma turma primeiro!', 'error');
+            return;
+        }
+
+        try {
+            const studentsData = await this.loadStudentsFromJSON();
+            if (studentsData[selectedClass]) {
+                studentsData[selectedClass].forEach(student => {
+                    const option = document.createElement('option');
+                    option.value = student.id;
+                    option.textContent = student.nome;
+                    studentSelect.appendChild(option);
+                });
+                this.showNotification('✅ Lista de alunos carregada!', 'success');
+            } else {
+                this.showNotification('❌ Nenhum aluno encontrado nesta turma.', 'error');
+            }
+        } catch (error) {
+            console.error('Erro ao carregar alunos:', error);
+            this.showNotification('❌ Erro ao carregar lista de alunos.', 'error');
+        }
+    }
 
     addScore() {
+        const tipo = document.getElementById('pontuacaoTipo').value;
         const sport = document.getElementById('sportSelect').value;
-        const className = document.getElementById('classSelect').value;
         const points = parseInt(document.getElementById('pointsInput').value) || 0;
 
-        if (!sport || !className) {
-            this.showNotification('❌ Selecione o tipo de pontuação e a turma!', 'error');
+        if (!tipo || !sport) {
+            this.showNotification('❌ Selecione o tipo de atribuição e o tipo de pontuação!', 'error');
             return;
         }
 
@@ -777,17 +1155,73 @@ class AdminSystem {
             return;
         }
 
-        // Adicionar pontuação usando o sistema antigo
+        if (tipo === 'turma') {
+            const className = document.getElementById('classSelect').value;
+            if (!className) {
+                this.showNotification('❌ Selecione a turma!', 'error');
+                return;
+            }
+
+            // Adicionar pontuação por turma
+            this.addScoreToClass(sport, className, points);
+            this.showNotification(`✅ ${points} pontos adicionados para turma ${className} em ${sport}!`, 'success');
+            this.addToHistory(`📊 ${points} pontos adicionados para turma: ${className} - ${sport}`);
+        } else if (tipo === 'individual') {
+            const studentId = document.getElementById('studentSelect').value;
+            const studentName = document.getElementById('studentSelect').options[document.getElementById('studentSelect').selectedIndex].text;
+            const className = document.getElementById('individualClassSelect').value;
+            
+            if (!studentId) {
+                this.showNotification('❌ Selecione um aluno!', 'error');
+                return;
+            }
+
+            if (!className) {
+                this.showNotification('❌ Turma do aluno não identificada!', 'error');
+                return;
+            }
+
+            // Adicionar pontuação individual
+            const scores = this.loadStudentScores();
+            const studentKey = `student_${studentId}`;
+            
+            if (!scores[studentKey]) {
+                scores[studentKey] = { points: 0, turma: className };
+            }
+            
+            scores[studentKey].points += points;
+            scores[studentKey].sport = sport; // Registrar o tipo de pontuação
+            this.saveStudentScores(scores);
+
+            // Somar os pontos também à turma
+            this.addScoreToClass(sport, className, points);
+
+            this.showNotification(`✅ ${points} pontos adicionados para ${studentName} e turma ${className} em ${sport}!`, 'success');
+            this.addToHistory(`👤 ${points} pontos adicionados para aluno: ${studentName} (${className}) - ${sport}`);
+        }
+
+        this.clearForm();
+        
+        // Atualizar página principal se estiver aberta
+        if (window.opener && window.opener.scoreSystem) {
+            window.opener.scoreSystem.updateTable();
+        }
+        // Também atualiza lastUpdate para sinalizar mudança
+        try {
+            localStorage.setItem('lastUpdate', new Date().toLocaleString('pt-BR'));
+        } catch (e) {
+            console.warn('Falha ao atualizar lastUpdate', e);
+        }
+    }
+
+    addScoreToClass(sport, className, points) {
+        // Adiciona pontos à turma e emite notificação
         if (window.opener && window.opener.addScoreFromAdmin) {
             window.opener.addScoreFromAdmin(sport, className, points);
         } else {
             this.addScoreToStorage(sport, className, points);
         }
-
-        this.clearForm();
-        
-        this.showNotification(`✅ ${points} pontos adicionados para ${className} em ${sport}!`, 'success');
-        this.addToHistory(`📊 ${points} pontos adicionados: ${className} - ${sport}`);
+        console.log(`[Admin] Adicionados ${points} pontos para turma ${className} em ${sport}`);
     }
 
     addScoreToStorage(sport, className, points) {
@@ -804,6 +1238,70 @@ class AdminSystem {
         scores[sport][className].points += points;
         localStorage.setItem('scores', JSON.stringify(scores));
         this.updateLastUpdate();
+    }
+
+    // Função para gerar selects de turma dinâmicos
+    createDynamicClassSelects() {
+        // Aguarda os dados dos alunos serem carregados
+        this.loadStudentsData().then(() => {
+            const turmas = Object.keys(this.studentsData);
+            // Agrupa por ano
+            const anosAgrupados = {};
+            turmas.forEach(turma => {
+                // Exemplo: "1° ano A" => ano: "1° ano", sala: "A"
+                const match = turma.match(/^(\d+)[°º]?\s*ano\s*([A-B]?)/i);
+                if (match) {
+                    const ano = match[1];
+                    const sala = match[2] || 'A';
+                    if (!anosAgrupados[ano]) anosAgrupados[ano] = [];
+                    anosAgrupados[ano].push({ turma, sala });
+                }
+            });
+
+            // Função para criar o select
+            function createSelect(id, required = true) {
+                const select = document.createElement('select');
+                select.id = id;
+                if (required) select.required = true;
+                select.innerHTML = '<option value="">Selecione a turma</option>';
+                Object.keys(anosAgrupados).forEach(ano => {
+                    const optgroup = document.createElement('optgroup');
+                    optgroup.label = `${ano}º Ano`;
+                    anosAgrupados[ano].forEach(obj => {
+                        const option = document.createElement('option');
+                        option.value = obj.turma;
+                        option.text = `${ano}º Ano ${obj.sala}`;
+                        optgroup.appendChild(option);
+                    });
+                    select.appendChild(optgroup);
+                });
+                return select;
+            }
+
+            // Substitui containers pelos selects dinâmicos
+            const teamClassContainer = document.getElementById('teamClassSelectContainer');
+            if (teamClassContainer) {
+                teamClassContainer.innerHTML = '';
+                const teamSelect = createSelect('teamClassSelect');
+                teamClassContainer.appendChild(teamSelect);
+                // Adiciona o event listener após criar o select
+                teamSelect.addEventListener('change', () => {
+                    this.loadTeamStudents();
+                });
+            }
+            const studentClassContainer = document.getElementById('studentClassSelectContainer');
+            if (studentClassContainer) {
+                studentClassContainer.innerHTML = '';
+                const studentSelect = createSelect('studentClassSelect');
+                studentClassContainer.appendChild(studentSelect);
+            }
+            const pontuacaoClassContainer = document.getElementById('pontuacaoClassSelectContainer');
+            if (pontuacaoClassContainer) {
+                pontuacaoClassContainer.innerHTML = '';
+                const classSelect = createSelect('classSelect');
+                pontuacaoClassContainer.appendChild(classSelect);
+            }
+        });
     }
 }
 
@@ -826,6 +1324,14 @@ window.addScore = function() {
 
 window.addRegistration = function() {
     window.adminSystem.addRegistration();
+};
+
+window.togglePontuacaoFields = function() {
+    window.adminSystem.togglePontuacaoFields();
+};
+
+window.loadStudentsForPontuacao = function() {
+    window.adminSystem.loadStudentsForPontuacao();
 };
 
 window.addTeam = function() {
@@ -899,6 +1405,7 @@ window.loadStudentsForPlayer2 = function() {
 // Inicializar o sistema quando a página carregar
 document.addEventListener('DOMContentLoaded', function() {
     window.adminSystem = new AdminSystem();
+    window.adminSystem.createDynamicClassSelects();
 });
 
 // Adicionar estilos CSS para animações de notificação
