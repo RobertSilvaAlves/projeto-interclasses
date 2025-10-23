@@ -391,19 +391,24 @@ class ScoreSystem {
         const classPlayers = Object.values(this.players).filter(player => player.class === className);
         let totalWins = 0, totalDraws = 0, totalLosses = 0, totalPoints = 0, totalGames = 0;
 
+        // Somar apenas vitórias/empates/derrotas/jogos a partir dos players (estatísticas)
+        // NÃO somar os pontos dos jogos aqui para evitar duplicação com o objeto `scores`.
         classPlayers.forEach(player => {
             const stats = this.calculatePlayerStats(player.id);
             totalWins += stats.wins;
             totalDraws += stats.draws;
             totalLosses += stats.losses;
-            totalPoints += stats.points;
             totalGames += stats.games;
         });
 
-        // Adicionar pontos dos alunos pré-cadastrados
-        const studentScores = this.loadStudentScores();
-        const classStudentPoints = this.calculateClassStudentPoints(className, studentScores);
-        totalPoints += classStudentPoints;
+        // A pontuação da turma vem exclusivamente do objeto `scores` (através de addScore/addScoreToClass)
+        if (this.currentSport !== 'geral') {
+            totalPoints = this.scores[this.currentSport]?.[className]?.points || 0;
+        } else {
+            Object.keys(this.scores).forEach(esporte => {
+                totalPoints += this.scores[esporte]?.[className]?.points || 0;
+            });
+        }
 
         return { wins: totalWins, draws: totalDraws, losses: totalLosses, points: totalPoints, games: totalGames };
     }
@@ -427,7 +432,13 @@ class ScoreSystem {
             '6A': '6º Ano A',
             '7A': '7º Ano A',
             '8A': '8º Ano A',
-            '9A': '9º Ano A'
+            '9A': '9º Ano A',
+            '1MA': '1º Ano Médio A',
+            '1MB': '1º Ano Médio B',
+            '2MA': '2º Ano Médio A',
+            '2MB': '2º Ano Médio B',
+            '3MA': '3º Ano Médio A',
+            '3MB': '3º Ano Médio B'
         };
 
         const jsonClassName = classMapping[className] || className;
@@ -457,12 +468,13 @@ class ScoreSystem {
         } catch (e) {
             alunosPorTurma = {};
         }
-        // Extrai apenas turmas do 1 ao 9 ano
+        // Extrai turmas do 1º ano ao 9º ano e do ensino médio
         const turmasValidas = Object.keys(alunosPorTurma).filter(turma => {
-            const match = turma.match(/^(\d+)[°º]?\s*ano\s*([A-B]?)/i);
-            if (!match) return false;
-            const ano = parseInt(match[1]);
-            return ano >= 1 && ano <= 9;
+            const matchRegular = turma.match(/^(\d+)[°º]?\s*ano\s*([A-B]?)/i);
+            const matchMedio = turma.match(/^(\d+)[°º]?\s*ano\s*médio\s*([A-B]?)/i);
+            if (!matchRegular && !matchMedio) return false;
+            const ano = parseInt(matchRegular?.[1] || matchMedio?.[1]);
+            return (ano >= 1 && ano <= 9) || (matchMedio && ano >= 1 && ano <= 3);
         });
 
     // Carregar studentScores uma vez
@@ -473,9 +485,17 @@ class ScoreSystem {
         if (this.currentView === 'salas') {
             turmasValidas.forEach(turma => {
                 // Extrai ano e sala
-                const match = turma.match(/^(\d+)[°º]?\s*ano\s*([A-B]?)/i);
-                const ano = match ? match[1] : '';
-                const sala = match ? match[2] : '';
+                const matchRegular = turma.match(/^(\d+)[°º]?\s*ano\s*([A-B]?)/i);
+                const matchMedio = turma.match(/^(\d+)[°º]?\s*ano\s*médio\s*([A-B]?)/i);
+                let ano;
+                if (matchMedio) {
+                    ano = matchMedio[1] + 'M'; // Adiciona M para diferenciar anos do ensino médio
+                } else if (matchRegular) {
+                    ano = matchRegular[1];
+                } else {
+                    ano = '';
+                }
+                const sala = (matchMedio || matchRegular)?.[2] || '';
                 // Filtra por ano se necessário
                 if (this.currentYear !== 'todos' && ano !== this.currentYear) return;
                 // Pontuação do esporte (valores adicionados manualmente via admin.addScore)
@@ -488,69 +508,9 @@ class ScoreSystem {
                     });
                 }
 
-                // Soma pontos dos alunos da turma vindos de studentScores (atribuições individuais)
-                let pontosAlunos = 0;
-                Object.keys(studentScores).forEach(studentKey => {
-                    const aluno = studentScores[studentKey];
-                    if (!aluno) return;
-                    if (aluno.turma === turma) {
-                        if (this.currentSport !== 'geral' && aluno.sports && aluno.sports[this.currentSport]) {
-                            pontosAlunos += aluno.sports[this.currentSport] || 0;
-                        } else if (this.currentSport === 'geral') {
-                            if (aluno.sports) {
-                                Object.values(aluno.sports).forEach(p => pontosAlunos += p || 0);
-                            } else if (aluno.points) {
-                                // fallback para estrutura antiga
-                                pontosAlunos += aluno.points || 0;
-                            }
-                        }
-                    }
-                });
-                pontos += pontosAlunos;
-
-                // Soma pontos dos jogos registrados (teams e players) pertencentes à turma
-                // Pontos de players (times) cadastrados
-                let pontosJogosTurma = 0;
-                console.log('[ScoreSystem] Somando pontos de jogos para turma', turma);
-
-                // Debug: listar todos os players/times
-                console.log('[ScoreSystem] Players cadastrados:', 
-                    Object.values(this.players).map(p => `${p.name} (${p.class})`));
-
-                Object.values(this.players).forEach(player => {
-                    // Normalizar className para comparação
-                    const playerClass = player.class || player.turma;
-                    console.log('[ScoreSystem] Verificando player', player.name, 'turma:', playerClass, 'contra:', turma);
-                    
-                    if (playerClass === turma) {
-                        const stats = this.calculatePlayerStats(player.id);
-                        console.log('[ScoreSystem] Player', player.name, 'da turma', turma, 'tem', stats.points, 'pontos de jogos');
-                        pontosJogosTurma += stats.points || 0;
-                    }
-                });
-
-                // Debug: listar estudantes com pontuação
-                console.log('[ScoreSystem] StudentScores:', Object.keys(studentScores).length, 'registros');
-
-                // Pontos de alunos (jogos de aluno x aluno)
-                Object.keys(studentScores).forEach(studentKey => {
-                    const aluno = studentScores[studentKey];
-                    if (!aluno) return;
-                    
-                    const sid = studentKey.replace('student_', '');
-                    const alunoTurma = aluno.turma || aluno.class;
-                    console.log('[ScoreSystem] Verificando aluno', studentKey, 'turma:', alunoTurma, 'contra:', turma);
-                    
-                    if (alunoTurma === turma) {
-                        const stats = this.calculateStudentStats(sid);
-                        console.log('[ScoreSystem] Aluno', studentKey, 'da turma', turma, 'tem', stats.points, 'pontos de jogos');
-                        pontosJogosTurma += stats.points || 0;
-                    }
-                });
-
-                console.log('[ScoreSystem] Total pontos de jogos para turma', turma, ':', pontosJogosTurma);
-                // Adiciona pontos vindos de jogos à pontuação da turma
-                pontos += pontosJogosTurma;
+                // Observação: a pontuação da turma vem exclusivamente do objeto `scores` (através de addScore/addScoreToClass).
+                // Não somamos aqui pontos vindos de jogos nem pontos individuais dos alunos para evitar duplicação
+                // e seguir a regra: "placar não é pontuação" e "pontuação dos alunos no time não conta para ranking geral".
                 // Só mostra se houver alunos ou pontos
                 if ((alunosPorTurma[turma] && alunosPorTurma[turma].length > 0) || pontos > 0) {
                     data.push({
@@ -573,17 +533,26 @@ class ScoreSystem {
             } catch (e) {
                 alunosPorTurma = {};
             }
-            // Extrai apenas turmas do 1 ao 9 ano
+            // Extrai turmas do 1º ano ao 9º ano e do ensino médio
             const turmasValidas = Object.keys(alunosPorTurma).filter(turma => {
-                const match = turma.match(/^(\d+)[°º]?\s*ano\s*([A-B]?)/i);
-                if (!match) return false;
-                const ano = parseInt(match[1]);
-                return ano >= 1 && ano <= 9;
+                const matchRegular = turma.match(/^(\d+)[°º]?\s*ano\s*([A-B]?)/i);
+                const matchMedio = turma.match(/^(\d+)[°º]?\s*ano\s*médio\s*([A-B]?)/i);
+                if (!matchRegular && !matchMedio) return false;
+                const ano = parseInt(matchRegular?.[1] || matchMedio?.[1]);
+                return (ano >= 1 && ano <= 9) || (matchMedio && ano >= 1 && ano <= 3);
             });
             // Para cada turma válida, lista alunos
             turmasValidas.forEach(turma => {
-                const match = turma.match(/^(\d+)[°º]?\s*ano\s*([A-B]?)/i);
-                const ano = match ? match[1] : '';
+                const matchRegular = turma.match(/^(\d+)[°º]?\s*ano\s*([A-B]?)/i);
+                const matchMedio = turma.match(/^(\d+)[°º]?\s*ano\s*médio\s*([A-B]?)/i);
+                let ano;
+                if (matchMedio) {
+                    ano = matchMedio[1] + 'M'; // Adiciona M para diferenciar anos do ensino médio
+                } else if (matchRegular) {
+                    ano = matchRegular[1];
+                } else {
+                    ano = '';
+                }
                 if (this.currentYear !== 'todos' && ano !== this.currentYear) return;
                 const alunos = alunosPorTurma[turma] || [];
                 alunos.forEach(aluno => {

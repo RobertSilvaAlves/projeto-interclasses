@@ -249,22 +249,71 @@ class AdminSystem {
             return this.studentsData;
         }
 
+        // Se existe fallback embutido com turmas do Ensino Médio, usá-lo preferencialmente
         try {
-            // Primeiro tenta carregar do localStorage (cache)
+            if (window.__studentsData && typeof window.__studentsData === 'object' && Object.keys(window.__studentsData).length > 0) {
+                const fallbackHasMedio = Object.keys(window.__studentsData).some(k => /m[eé]dio/i.test(k));
+                if (fallbackHasMedio) {
+                    console.log('loadStudentsData: detectado window.__studentsData com Ensino Médio — usando fallback');
+                    this.studentsData = window.__studentsData;
+                    try { localStorage.setItem('studentsData', JSON.stringify(this.studentsData)); } catch(e){/* ignore */}
+                    return this.studentsData;
+                }
+            }
+        } catch (e) {
+            console.warn('Erro ao acessar window.__studentsData', e);
+        }
+
+        try {
+            // Primeiro tenta carregar do localStorage (cache) — usa somente se não estiver vazio
             const cachedData = localStorage.getItem('studentsData');
             if (cachedData) {
-                this.studentsData = JSON.parse(cachedData);
-                console.log('Dados dos alunos carregados do cache:', this.studentsData);
-                return this.studentsData;
+                try {
+                    const parsed = JSON.parse(cachedData);
+                    if (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0) {
+                        // Se o cache não tem turmas do Ensino Médio, mas o fallback tem, usa o fallback
+                        const hasMedio = Object.keys(parsed).some(k => /m[eé]dio/i.test(k));
+                        const fallbackHasMedio = window.__studentsData && Object.keys(window.__studentsData).some(k => /m[eé]dio/i.test(k));
+                        if (!hasMedio && fallbackHasMedio) {
+                            console.log('Cache sem Ensino Médio detectado, usando fallback window.__studentsData');
+                            this.studentsData = window.__studentsData;
+                            localStorage.setItem('studentsData', JSON.stringify(this.studentsData));
+                            return this.studentsData;
+                        }
+
+                        this.studentsData = parsed;
+                        console.log('Dados dos alunos carregados do cache:', this.studentsData);
+                        return this.studentsData;
+                    } else {
+                        console.log('Cache studentsData vazio ou inválido — ignorando cache');
+                    }
+                } catch (e) {
+                    console.warn('Cache studentsData inválido JSON — ignorando cache', e);
+                }
             }
 
             // Se não tem cache, carrega do arquivo
-            const response = await fetch('assets/alunos_por_turma.json');
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+            let data = null;
+            try {
+                const response = await fetch('assets/alunos_por_turma.json');
+                if (response && response.ok) {
+                    data = await response.json();
+                } else {
+                    console.warn('Fetch retornou response não OK ou indefinido, usando fallback se disponível');
+                }
+            } catch (fetchErr) {
+                console.warn('Falha no fetch de alunos_por_turma.json:', fetchErr);
             }
 
-            const data = await response.json();
+            // Se não conseguiu via fetch, tenta o fallback em window.__studentsData
+            if (!data && window.__studentsData) {
+                console.log('Usando fallback window.__studentsData');
+                data = window.__studentsData;
+            }
+
+            if (!data) {
+                throw new Error('Arquivo JSON vazio ou inválido e fallback não disponível');
+            }
             if (!data || Object.keys(data).length === 0) {
                 throw new Error('Arquivo JSON vazio ou inválido');
             }
@@ -859,13 +908,8 @@ class AdminSystem {
             player1Name = student1.nome;
             player2Name = student2.nome;
 
-            // Somar pontos à turma dos alunos
-            if (player1BonusPoints > 0) {
-                this.addScoreToClass(sport, player1Class, player1BonusPoints);
-            }
-            if (player2BonusPoints > 0) {
-                this.addScoreToClass(sport, player2Class, player2BonusPoints);
-            }
+            // NOTA: Não somar automaticamente os bônus dos alunos à pontuação da turma.
+            // Pontos individuais permanecem apenas para ranking individual.
         }
 
         if (player1Id === player2Id) {
@@ -1052,35 +1096,28 @@ class AdminSystem {
     }
 
     normalizeClassName(className) {
-        // Converter formato "3B" para "3º ano B"
+        // Converter formatos de turma para padrão normalizado
         if (!className) return '';
 
         // Se já estiver no formato completo, retorna como está
         if (className.includes('ano')) return className;
 
-        let normalized = className;
-
-        // Tratar turmas do ensino médio (ex: 1MB -> 1º Ano Médio B)
-        if (className.includes('M')) {
-            const number = className.charAt(0);
-            const letter = className.charAt(2);
-            return [
-                `${number}º Ano Médio ${letter}`,
-                `${number}° Ano Médio ${letter}`,
-                `${number}º ano Médio ${letter}`,
-                `${number}° ano Médio ${letter}`
-            ][0]; // Retorna o primeiro formato
+        // Tratar turmas do ensino médio (ex: 1MA ou 1MB -> 1º Ano Médio A/B)
+        const medioMatch = className.match(/^(\d+)M([AB])$/i);
+        if (medioMatch) {
+            const [_, number, letter] = medioMatch;
+            return `${number}º Ano Médio ${letter}`;
         }
 
-        // Tratar turmas regulares (ex: 3B -> 3º ano B)
-        const number = className.charAt(0);
-        const letter = className.charAt(1);
-        return [
-            `${number}° ano ${letter}`,
-            `${number}º ano ${letter}`,
-            `${number}° Ano ${letter}`,
-            `${number}º Ano ${letter}`
-        ][0]; // Retorna o primeiro formato
+        // Tratar turmas regulares (ex: 3A ou 3B -> 3º ano A/B)
+        const regularMatch = className.match(/^(\d+)([AB])$/i);
+        if (regularMatch) {
+            const [_, number, letter] = regularMatch;
+            return `${number}º ano ${letter}`;
+        }
+
+        // Se nenhum padrão foi reconhecido, retorna como está
+        return className;
     }
 
     async loadStudentsFromJSON() {
@@ -1193,10 +1230,8 @@ class AdminSystem {
             scores[studentKey].sport = sport; // Registrar o tipo de pontuação
             this.saveStudentScores(scores);
 
-            // Somar os pontos também à turma
-            this.addScoreToClass(sport, className, points);
-
-            this.showNotification(`✅ ${points} pontos adicionados para ${studentName} e turma ${className} em ${sport}!`, 'success');
+            // NÃO somar esses pontos à turma: pontos individuais são apenas para ranking individual
+            this.showNotification(`✅ ${points} pontos adicionados para ${studentName} (individual) em ${sport}!`, 'success');
             this.addToHistory(`👤 ${points} pontos adicionados para aluno: ${studentName} (${className}) - ${sport}`);
         }
 
@@ -1245,17 +1280,37 @@ class AdminSystem {
         // Aguarda os dados dos alunos serem carregados
         this.loadStudentsData().then(() => {
             const turmas = Object.keys(this.studentsData);
+            console.log('[Admin] createDynamicClassSelects - turmas encontradas:', turmas.length, turmas);
+            const loadedFromCache = false; // placeholder, apenas para legibilidade do log
+            const hasMedio = turmas.some(t => /m[eé]dio/i.test(t));
+            console.log('[Admin] createDynamicClassSelects - contém Ensino Médio?', hasMedio);
             // Agrupa por ano
-            const anosAgrupados = {};
+                const anosAgrupados = {
+                    fundamental: {},
+                    medio: {}
+                };
             turmas.forEach(turma => {
-                // Exemplo: "1° ano A" => ano: "1° ano", sala: "A"
-                const match = turma.match(/^(\d+)[°º]?\s*ano\s*([A-B]?)/i);
-                if (match) {
-                    const ano = match[1];
-                    const sala = match[2] || 'A';
-                    if (!anosAgrupados[ano]) anosAgrupados[ano] = [];
-                    anosAgrupados[ano].push({ turma, sala });
+                    // log para diagnóstico
+                    // console.debug(`[Admin] verificando turma: "${turma}"`);
+                    // Tenta match para ensino médio primeiro
+                    const matchMedio = turma.match(/^(\d+)[°º]?\s*ano\s*médio\s*([A-B]?)/i);
+                    if (matchMedio) {
+                        const ano = matchMedio[1];
+                        const sala = matchMedio[2] || 'A';
+                        console.log(`[Admin] matchMedio: ${turma} -> ano ${ano} sala ${sala}`);
+                        if (!anosAgrupados.medio[ano]) anosAgrupados.medio[ano] = [];
+                        anosAgrupados.medio[ano].push({ turma, sala });
+                        return;
                 }
+
+                    // Depois tenta match para ensino fundamental
+                    const matchFundamental = turma.match(/^(\d+)[°º]?\s*ano\s*([A-B]?)/i);
+                    if (matchFundamental) {
+                        const ano = matchFundamental[1];
+                        const sala = matchFundamental[2] || 'A';
+                        if (!anosAgrupados.fundamental[ano]) anosAgrupados.fundamental[ano] = [];
+                        anosAgrupados.fundamental[ano].push({ turma, sala });
+                    }
             });
 
             // Função para criar o select
@@ -1264,17 +1319,33 @@ class AdminSystem {
                 select.id = id;
                 if (required) select.required = true;
                 select.innerHTML = '<option value="">Selecione a turma</option>';
-                Object.keys(anosAgrupados).forEach(ano => {
-                    const optgroup = document.createElement('optgroup');
-                    optgroup.label = `${ano}º Ano`;
-                    anosAgrupados[ano].forEach(obj => {
-                        const option = document.createElement('option');
-                        option.value = obj.turma;
-                        option.text = `${ano}º Ano ${obj.sala}`;
-                        optgroup.appendChild(option);
-                    });
-                    select.appendChild(optgroup);
+                
+                    // Primeiro adiciona o ensino fundamental
+                    const fundamentalGroup = document.createElement('optgroup');
+                    fundamentalGroup.label = 'Ensino Fundamental';
+                    Object.keys(anosAgrupados.fundamental).sort().forEach(ano => {
+                        anosAgrupados.fundamental[ano].forEach(obj => {
+                            const option = document.createElement('option');
+                            option.value = obj.turma;
+                            option.text = `${ano}º Ano ${obj.sala}`;
+                            fundamentalGroup.appendChild(option);
+                        });
                 });
+                    select.appendChild(fundamentalGroup);
+                
+                    // Depois adiciona o ensino médio
+                    const medioGroup = document.createElement('optgroup');
+                    medioGroup.label = 'Ensino Médio';
+                    Object.keys(anosAgrupados.medio).sort().forEach(ano => {
+                        anosAgrupados.medio[ano].forEach(obj => {
+                            console.log('[Admin] adicionando option medio:', ano, obj);
+                            const option = document.createElement('option');
+                            option.value = obj.turma;
+                            option.text = `${ano}º Ano Médio ${obj.sala}`;
+                            medioGroup.appendChild(option);
+                        });
+                    });
+                    select.appendChild(medioGroup);
                 return select;
             }
 
@@ -1301,6 +1372,42 @@ class AdminSystem {
                 const classSelect = createSelect('classSelect');
                 pontuacaoClassContainer.appendChild(classSelect);
             }
+
+            // Também atualizar selects estáticos presentes no HTML (fallback)
+            function populateStaticSelect(selectId) {
+                const el = document.getElementById(selectId);
+                if (!el) return;
+                // Limpa opções existentes
+                el.innerHTML = '<option value="">Selecione a sala</option>';
+
+                // Adiciona optgroups para Fundamental e Médio
+                const fg = document.createElement('optgroup');
+                fg.label = 'Ensino Fundamental';
+                Object.keys(anosAgrupados.fundamental).sort().forEach(ano => {
+                    anosAgrupados.fundamental[ano].forEach(obj => {
+                        const option = document.createElement('option');
+                        option.value = obj.turma;
+                        option.text = `${ano}º Ano ${obj.sala}`;
+                        fg.appendChild(option);
+                    });
+                });
+
+                const mg = document.createElement('optgroup');
+                mg.label = 'Ensino Médio';
+                Object.keys(anosAgrupados.medio).sort().forEach(ano => {
+                    anosAgrupados.medio[ano].forEach(obj => {
+                        const option = document.createElement('option');
+                        option.value = obj.turma;
+                        option.text = `${ano}º Ano Médio ${obj.sala}`;
+                        mg.appendChild(option);
+                    });
+                });
+
+                el.appendChild(fg);
+                el.appendChild(mg);
+            }
+
+            ['student1ClassSelect','student2ClassSelect','individualClassSelect','studentClassSelect'].forEach(id => populateStaticSelect(id));
         });
     }
 }

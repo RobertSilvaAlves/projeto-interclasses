@@ -734,5 +734,203 @@
             "id": 85,
             "nome": "Vivien Hipólito da Silva"
         }
+    ],
+    "1º Ano Médio A": [
+        {
+            "id": 86,
+            "nome": "Arthur Ferro Scarabel"
+        },
+        {
+            "id": 87,
+            "nome": "Celso da Silva Lopes Filho"
+        },
+        {
+            "id": 88,
+            "nome": "Davi de Lima Guimarães Melo"
+        },
+        {
+            "id": 89,
+            "nome": "Felipe Cordeiro da Silva Francisco"
+        },
+        {
+            "id": 90,
+            "nome": "Gean Matheus Sampaio Menezes"
+        },
+        {
+            "id": 91,
+            "nome": "Guilherme Gomes Abe"
+        },
+        {
+            "id": 92,
+            "nome": "Gustavo Nascimento Zaias"
+        },
+        {
+            "id": 93,
+            "nome": "João Pedro Ribeiro Leão"
+        },
+        {
+            "id": 94,
+            "nome": "Juan Carlos Brandoli Lopes"
+        },
+        {
+            "id": 95,
+            "nome": "Kauê Alves Silva"
+        },
+        {
+            "id": 96,
+            "nome": "Laura Rodrigues Gonçalves"
+        },
+        {
+            "id": 97,
+            "nome": "Laynara Aparecida da Silva Pereira"
+        },
+        {
+            "id": 98,
+            "nome": "Murilo Damascena Rossoni"
+        },
+        {
+            "id": 99,
+            "nome": "Nicolas Delegredo Alemany"
+        },
+        {
+            "id": 100,
+            "nome": "Pedro Henrique Marchi Bondezan de Araujo"
+        },
+        {
+            "id": 101,
+            "nome": "Samira Perussetto Secato"
+        },
+        {
+            "id": 102,
+            "nome": "Thiago Antebi"
+        },
+        {
+            "id": 103,
+            "nome": "Valentina Bozzato Peruzzetto"
+        },
+        {
+            "id": 104,
+            "nome": "Vinícius Toffano da Silva"
+        },
+        {
+            "id": 105,
+            "nome": "Letícia Icorissa"
+        }
+    ],
+    "2º Ano Médio A": [
+        {
+            "id": 106,
+            "nome": "Christian Camatta Garcia Fernandes"
+        },
+        {
+            "id": 107,
+            "nome": "Gabriela Gonçalves Claro"
+        },
+        {
+            "id": 108,
+            "nome": "Giovanna Simplicio dos Santos"
+        },
+        {
+            "id": 109,
+            "nome": "Guilherme Alves da Conceição"
+        },
+        {
+            "id": 110,
+            "nome": "Guilherme Michel Arena de Souza"
+        },
+        {
+            "id": 111,
+            "nome": "Isadora Fernandes Brandão"
+        },
+        {
+            "id": 112,
+            "nome": "João Pedro Dias Lopes"
+        },
+        {
+            "id": 113,
+            "nome": "Kyara Parra Minson"
+        },
+        {
+            "id": 114,
+            "nome": "Laura Leite Marques"
+        },
+        {
+            "id": 115,
+            "nome": "Laura Rocha Alves"
+        },
+        {
+            "id": 116,
+            "nome": "Lucas Emanoel Marques Pereira"
+        },
+        {
+            "id": 117,
+            "nome": "Matheus Tineo Dias"
+        },
+        {
+            "id": 118,
+            "nome": "Miguel Masteghin de Souza Oliveira"
+        },
+        {
+            "id": 119,
+            "nome": "Rebeca Biazoto Melo"
+        },
+        {
+            "id": 120,
+            "nome": "Thalita Zerbinatti Oliveira D Marchi"
+        },
+        {
+            "id": 121,
+            "nome": "Tiago Pereira da Silva"
+        }
+    ],
+    "3º Ano Médio A": [
+        {
+            "id": 122,
+            "nome": "Emilly Chistine Ramos Vitorino"
+        },
+        {
+            "id": 123,
+            "nome": "Giovanna Silva dos Santos"
+        },
+        {
+            "id": 124,
+            "nome": "Guilherme Medicci Silva"
+        },
+        {
+            "id": 125,
+            "nome": "Jorge José Trindade Neto"
+        },
+        {
+            "id": 126,
+            "nome": "Kaique Britto Aragão"
+        },
+        {
+            "id": 127,
+            "nome": "Laura Bassi Lopes"
+        },
+        {
+            "id": 128,
+            "nome": "Miguel Armando de Souza Gomes"
+        },
+        {
+            "id": 129,
+            "nome": "Ryan Mendes Bruno"
+        },
+        {
+            "id": 130,
+            "nome": "Sabrina Machado da Silva"
+        },
+        {
+            "id": 131,
+            "nome": "Samara Gavioli Lima"
+        },
+        {
+            "id": 132,
+            "nome": "Tiago Zaratini Araújo"
+        },
+        {
+            "id": 133,
+            "nome": "Victor Hugo Silva"
+        }
     ]
 }
